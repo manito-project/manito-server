@@ -1,4 +1,4 @@
-const members = [
+const data = [
   "김우영",
   "이다은",
   "이한나",
@@ -37,14 +37,13 @@ const createPairs = (members) => {
     // const randomIndex = Math.floor(Math.random() * tempMembers.length);
 
     const team = { manito: tempMembers[i], manitee: tempMembers[i + 1] };
+    const isDuplicate = teams.some((t) => pastPairs.includes(t));
 
-    for (let j = 0; j < pastPairs.length; j++) {
-      if (JSON.stringify(pastPairs[j]) === JSON.stringify(team)) {
-        console.log("중복");
+    if (isDuplicate) {
+      console.log("중복, 다시 돌림ㅁ");
 
-        pastPairs.splice(i + 1);
-        createPairs(members);
-      }
+      pastPairs.splice(i + 1);
+      createPairs(members);
     }
     teams.push(team);
   }
@@ -57,5 +56,15 @@ const createPairs = (members) => {
   teams.push(lastTeam);
   pastPairs.push(...teams);
   //   console.log(teams);
-  console.log(teams);
+  // console.log(teams);
+  return teams;
 };
+
+// for (let s = 0; s < 4; s++) {
+//   console.log(createPairs(data));
+//   if (checkIfDuplicateExists(pastPairs)) {
+//     console.log("중복 발생!");
+//   }
+// }
+
+module.exports = createPairs;
