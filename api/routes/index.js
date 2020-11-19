@@ -2,10 +2,9 @@ var express = require("express");
 var router = express.Router();
 
 // Users Router
-router.get("/users", function (req, res, next) {
-  res.render("index", { title: "Express" });
-});
+router.get("/users", require("./userRouter"));
 
-// Teams Router
+// Rooms Router
+router.get("/rooms", require("./roomRouter"));
 
 module.exports = router;
