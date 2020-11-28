@@ -4,8 +4,18 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
+const { sequelize } = require("./api/models");
 
 var indexRouter = require("./api/routes/index");
+
+sequelize
+  .sync({ alter: false })
+  .then(() => {
+    console.log("✅Connected to the database!");
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 var app = express();
 app.use(cors());

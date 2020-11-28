@@ -17,11 +17,13 @@ if (config.use_env_variable) {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
-db.User = require("./user")(sequelize, Sequelize);
-db.Room = require("./room")(sequelize, Sequelize);
-db.Member = require("./member")(sequelize, Sequelize);
+db.User = require("./User")(sequelize, Sequelize);
+db.Room = require("./Room")(sequelize, Sequelize);
+db.Member = require("./Member")(sequelize, Sequelize);
 
 db.User.hasMany(db.Room, { onDelete: "cascade" });
 db.Room.belongsTo(db.User);
 
 db.User.belongsToMany(db.Room, { through: "Member", as: "member" });
+
+module.exports = db;

@@ -1,3 +1,5 @@
+const Room = require("./Room");
+const User = require("./User");
 
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
@@ -6,14 +8,14 @@ module.exports = (sequelize, DataTypes) => {
       UserId: {
         type: DataTypes.INTEGER,
         reference: {
-          model: userModel,
+          model: User,
           key: "id",
         },
       },
       RoomId: {
         type: DataTypes.INTEGER,
         reference: {
-          model: roomModel,
+          model: Room,
           key: "id",
         },
       },
