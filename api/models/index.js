@@ -19,11 +19,12 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 db.User = require("./User")(sequelize, Sequelize);
 db.Room = require("./Room")(sequelize, Sequelize);
-db.Member = require("./Member")(sequelize, Sequelize);
+db.User_Room = require("./User_Room")(sequelize, Sequelize);
 
 db.User.hasMany(db.Room, { onDelete: "cascade" });
 db.Room.belongsTo(db.User);
 
-db.User.belongsToMany(db.Room, { through: "Member", as: "member" });
+db.User.belongsToMany(db.Room, { through: "User_Room" });
+db.Room.belongsToMany(db.User, { through: "User_Room", as: "Members" });
 
 module.exports = db;

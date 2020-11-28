@@ -3,7 +3,7 @@ const User = require("./User");
 
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
-    "Member",
+    "User_Room",
     {
       UserId: {
         type: DataTypes.INTEGER,
