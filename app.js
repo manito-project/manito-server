@@ -9,7 +9,7 @@ const { sequelize } = require("./api/models");
 var indexRouter = require("./api/routes/index");
 
 sequelize
-  .sync({ alter: true })
+  .sync({ alter: false })
   .then(() => {
     console.log("✅Connected to the database!");
   })
@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/manito/v1", indexRouter);
+app.use("/manitto/v1", indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
