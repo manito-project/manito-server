@@ -1,10 +1,10 @@
 var express = require("express");
-var router = express.Router();
+var indexRouter = express.Router();
 
 // Users Router
-router.get("/users", require("./userRouter"));
+indexRouter.use("/users", require("./userRouter"));
 
 // Rooms Router
-router.get("/rooms", require("./roomRouter"));
+indexRouter.use("/rooms", require("./roomRouter"));
 
-module.exports = router;
+module.exports = indexRouter;
