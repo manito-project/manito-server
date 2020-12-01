@@ -2,8 +2,12 @@ module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
     "User",
     {
-      nickname: {
+      username: {
         type: DataTypes.STRING(30),
+        allowNull: false,
+      },
+      serialNumber: {
+        type: DataTypes.STRING(400),
         allowNull: false,
       },
     },
