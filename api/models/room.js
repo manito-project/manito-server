@@ -6,10 +6,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(30),
         allowNull: false,
       },
-      roomImageUrl: {
-        type: DataTypes.STRING(400),
-        allowNull: true,
+      expiration: {
+        type: DataTypes.DATE,
+        allowNull: false,
       },
+      // roomImageUrl: {
+      //   type: DataTypes.STRING(400),
+      //   allowNull: true,
+      // },
     },
     { freezeTableName: true, timestamps: true },
   );
