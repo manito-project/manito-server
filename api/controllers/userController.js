@@ -14,7 +14,13 @@ module.exports = {
       console.log(user);
       res
         .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.CREATED_USER, user));
+        .send(
+          util.success(
+            statusCode.OK,
+            responseMessage.CREATE_USER_SUCCESS,
+            user,
+          ),
+        );
     } catch (error) {
       console.log(error);
       res
@@ -79,7 +85,12 @@ module.exports = {
       if (!user) {
         return res
           .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+          .send(
+            util.fail(
+              statusCode.BAD_REQUEST,
+              responseMessage.GET_ONE_USER_FAIL,
+            ),
+          );
       }
       res
         .status(statusCode.OK)
