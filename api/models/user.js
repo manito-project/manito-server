@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      freezeTalbeName: true,
+      freezeTableName: true,
       timestamps: true,
     },
   );

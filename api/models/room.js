@@ -5,11 +5,19 @@ module.exports = (sequelize, DataTypes) => {
       roomName: {
         type: DataTypes.STRING(30),
         allowNull: false,
+        unique: true,
       },
       expiration: {
         type: DataTypes.DATE,
         allowNull: false,
       },
+      invitationCode: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
+        unique: true,
+      },
+      // missions: {},
+
       // roomImageUrl: {
       //   type: DataTypes.STRING(400),
       //   allowNull: true,
