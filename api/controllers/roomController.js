@@ -12,7 +12,7 @@ module.exports = {
     const { roomName, expiration } = req.body;
     const invitationCode = generateCode();
     const { missionContents } = req.body;
-    const { userId } = req.body;
+    const { id: userId } = req.user;
     try {
       const user = await User.findOne({ where: { id: userId } });
       const room = await Room.create({
@@ -26,6 +26,7 @@ module.exports = {
           await room.addMission(mission);
         });
       }
+      await User_Room.create({ RoomId: room.id, UserId: user.id });
       await user.addRoom(room);
       res
         .status(statusCode.OK)
@@ -57,7 +58,13 @@ module.exports = {
   getAllRooms: async (req, res) => {
     try {
       const rooms = await Room.findAll({
-        // attributes: ["id", "roomName", "expiration", "invitationCode"],
+        attributes: [
+          "id",
+          "roomName",
+          "expiration",
+          "invitationCode",
+          "creatorId",
+        ],
       });
       if (!rooms) {
         return res

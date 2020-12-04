@@ -53,6 +53,13 @@ module.exports = {
   PROFILE_POST_SUCCESS: "프로필 등록 성공",
   PROFILE_POST_FAIL: "프로필 등록 실패",
 
+  /* 토큰 */
+  EMPTY_TOKEN: "토큰 값이 없습니다.",
+  EXPIRED_TOKEN: "토큰 값이 만료되었습니다.",
+  INVALID_TOKEN: "유효하지 않은 토큰값입니다.",
+  AUTH_SUCCESS: "인증에 성공했습니다.",
+  ISSUE_SUCCESS: "새로운 토큰이 생성되었습니다.",
+
   /* 서버에러 */
   INTERNAL_SERVER_ERROR: "서버 내부 오류",
 };

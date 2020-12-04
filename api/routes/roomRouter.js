@@ -1,9 +1,10 @@
 const express = require("express");
 const roomController = require("../controllers/roomController");
 const roomRouter = express.Router();
+const authMiddleware = require("../middlewares/authMiddleware");
 
 // Create a room
-roomRouter.post("/", roomController.createRoom);
+roomRouter.post("/", authMiddleware.checkToken, roomController.createRoom);
 
 // Read all rooms
 roomRouter.get("/", roomController.getAllRooms);

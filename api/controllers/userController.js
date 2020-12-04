@@ -1,4 +1,5 @@
 const { User } = require("../models");
+const jwt = require("../modules/jwt");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");
 const util = require("../modules/util");
@@ -12,15 +13,14 @@ module.exports = {
     try {
       const user = await User.create({ username, serialNumber });
       console.log(user);
-      res
-        .status(statusCode.OK)
-        .send(
-          util.success(
-            statusCode.OK,
-            responseMessage.CREATE_USER_SUCCESS,
-            user,
-          ),
-        );
+      const { accessToken, refreshToken } = await jwt.sign(user);
+      res.status(statusCode.OK).send(
+        util.success(statusCode.OK, responseMessage.CREATE_USER_SUCCESS, {
+          ...user.dataValues,
+          accessToken,
+          refreshToken,
+        }),
+      );
     } catch (error) {
       console.log(error);
       res
