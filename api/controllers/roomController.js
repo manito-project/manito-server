@@ -1,7 +1,8 @@
-const { Room, User_Room, Mission } = require("../models");
+const { Room, User, User_Room, Mission } = require("../models");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");
 const util = require("../modules/util");
+const createPairs = require("../services/createPairs");
 const generateCode = require("../services/generateCode");
 
 // TODO: user authentication
@@ -11,7 +12,9 @@ module.exports = {
     const { roomName, expiration } = req.body;
     const invitationCode = generateCode();
     const { missionContents } = req.body;
+    const { userId } = req.body;
     try {
+      const user = await User.findOne({ where: { id: userId } });
       const room = await Room.create({
         roomName,
         expiration,
@@ -23,6 +26,7 @@ module.exports = {
           await room.addMission(mission);
         });
       }
+      await user.addRoom(room);
       res
         .status(statusCode.OK)
         .send(
@@ -98,14 +102,15 @@ module.exports = {
         where: { id: roomId },
         attributes: ["id", "roomName", "expiration", "invitationCode"],
         include: [
-          {
-            model: Mission,
-            attributes: ["id", "content", "roomId"],
-          },
+          // {
+          //   model: Mission,
+          //   attributes: ["id", "content", "roomId"],
+          // },
+          { model: User },
           {
             model: User,
-            as: "Member",
-            attributes: ["id", "nickname"],
+            as: "Members",
+            attributes: ["id", "username"],
           },
         ],
       });
@@ -163,12 +168,12 @@ module.exports = {
   },
   enterRoom: async (req, res) => {
     const { invitationCode } = req.body;
-    const { userId } = req.body;
+    const { UserId } = req.body;
 
     try {
       const room = await Room.findOne({
         where: { invitationCode },
-        attributes: ["roomName", "expiration", "invitationCode"],
+        attributes: ["id", "roomName", "expiration", "invitationCode"],
       });
       if (!room) {
         return res
@@ -176,7 +181,7 @@ module.exports = {
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.INVALID_CODE));
       }
       const RoomId = room.id;
-      const UserId = "2";
+      // const UserId = "2";
       console.log(room);
       const newMember = await User_Room.create({ RoomId, UserId });
       res.status(statusCode.OK).send(
@@ -185,6 +190,53 @@ module.exports = {
           newMember,
         }),
       );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR,
+          ),
+        );
+    }
+  },
+  matchPairs: async (req, res) => {
+    const { RoomId } = req.body;
+    try {
+      const members = await User_Room.findAll({
+        where: { RoomId },
+      });
+      const oldData = members.map((member) => member.dataValues);
+      // console.log(cleanData);
+      const newData = createPairs(oldData);
+      console.log(newData);
+      await Promise.all(
+        newData.map(
+          async (d) =>
+            await User_Room.update(
+              {
+                ManittoUserId: d.ManittoUserId,
+                ManitteeUserId: d.ManitteeUserId,
+              },
+              { where: { UserId: d.UserId } },
+            ),
+        ),
+      );
+      const updatedMembers = await User_Room.findAll({
+        where: { RoomId },
+      });
+      // console.log(test);
+      res
+        .status(statusCode.OK)
+        .send(
+          util.success(
+            statusCode.OK,
+            responseMessage.MATCHING_SUCCESS,
+            updatedMembers,
+          ),
+        );
     } catch (error) {
       console.log(error);
       res
