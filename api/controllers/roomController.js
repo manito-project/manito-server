@@ -10,8 +10,14 @@ const generateCode = require("../services/generateCode");
 module.exports = {
   createRoom: async (req, res) => {
     const { roomName, expiration, missionContents } = req.body;
+    if (!roomName || !expiration) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
     const invitationCode = generateCode();
     const { id: userId } = req.user;
+
     try {
       const user = await User.findOne({ where: { id: userId } });
       const room = await Room.create({
@@ -115,7 +121,7 @@ module.exports = {
           },
           {
             model: Mission,
-            attributes: ["id", "content"],
+            attributes: ["content"],
           },
           {
             model: User,
@@ -182,6 +188,11 @@ module.exports = {
   },
   enterRoom: async (req, res) => {
     const { invitationCode } = req.body;
+    if (!invitationCode) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
     const { id: UserId } = req.user;
 
     try {
@@ -195,7 +206,7 @@ module.exports = {
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.INVALID_CODE));
       }
       const RoomId = room.id;
-      const [newMember, created] = await User_Room.findOrCreate({
+      const [_, created] = await User_Room.findOrCreate({
         where: {
           RoomId,
           UserId,
@@ -208,10 +219,14 @@ module.exports = {
             util.fail(statusCode.BAD_REQUEST, responseMessage.DUPLICATE_MEMBER),
           );
       } else {
+        const user = await User.findOne({
+          where: { id: UserId },
+          attributes: ["id", "username"],
+        });
         return res.status(statusCode.OK).send(
           util.success(statusCode.OK, responseMessage.ROOM_ENTER_SUCCESS, {
             room,
-            newMember,
+            user,
           }),
         );
       }
@@ -243,7 +258,6 @@ module.exports = {
         where: { RoomId: roomId },
       });
       const dataBeforeMatching = members.map((member) => member.dataValues);
-      // console.log(dataBeforeMatching);
       const dataAfterMatching = createPairs(dataBeforeMatching);
       let roomMissions = await Mission.findAll({ where: { RoomId: roomId } });
       await Promise.all(
@@ -257,15 +271,16 @@ module.exports = {
             ManittoUserId: d.ManittoUserId,
           });
           console.log(roomMissions[randomIndex]);
-          roomMissions[randomIndex].addUser_Room(member);
+          if (roomMissions.length !== 0) {
+            roomMissions[randomIndex].addUser_Room(member);
+          }
         }),
       );
       const updatedMembers = await User_Room.findAll({
         where: { RoomId: roomId },
-        attributes: ["RoomId", "UserId", "SantaUserId", "ManittoUserId"],
+        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
-      // console.log(test);
       res
         .status(statusCode.OK)
         .send(
@@ -292,19 +307,15 @@ module.exports = {
     const { roomId } = req.params;
     try {
       const myRelations = await User_Room.findOne({
-        where: { RoomId: roomId, UserId: userId },
+        where: { RoomId: roomId, UserId: "z" },
         attributes: ["UserId", "SantaUserId", "ManittoUserId"],
-        include: [{ model: Mission, as: "PairMission" }],
+        include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
-      // const myRelations = await User.findOne({
-      //   where: { id: userId },
-      //   attributes: ["id", "username"],
-      //   include: [
-      //     {
-      //       model: User_Room,
-      //     },
-      //   ],
-      // });
+      if (!myRelations) {
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
+      }
       res
         .status(statusCode.OK)
         .send(

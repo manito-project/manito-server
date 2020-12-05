@@ -5,7 +5,6 @@ module.exports = (sequelize, DataTypes) => {
       roomName: {
         type: DataTypes.STRING(30),
         allowNull: false,
-        unique: true,
       },
       expiration: {
         type: DataTypes.DATE,
@@ -16,12 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      // missions: {},
-
-      // roomImageUrl: {
-      //   type: DataTypes.STRING(400),
-      //   allowNull: true,
-      // },
     },
     { freezeTableName: true, timestamps: true },
   );

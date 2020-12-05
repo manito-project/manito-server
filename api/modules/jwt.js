@@ -15,7 +15,7 @@ module.exports = {
     };
     const result = {
       accessToken: jwt.sign(payload, secretKey, options),
-      refreshToken: jwt.sign(payload, secretKey, refreshOptions),
+      // refreshToken: jwt.sign(payload, secretKey, refreshOptions),
     };
     return result;
   },

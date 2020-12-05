@@ -2,10 +2,6 @@ module.exports = {
   NULL_VALUE: "필요한 값이 없습니다",
   OUT_OF_VALUE: "파라미터 값이 잘못되었습니다",
 
-  // 회원가입
-  DELETE_USER: "회원 탈퇴 성공",
-  ALREADY_ID: "이미 사용중인 아이디입니다.",
-
   // 로그인
   LOGIN_SUCCESS: "로그인 성공",
   LOGIN_FAIL: "로그인 실패",
@@ -23,6 +19,7 @@ module.exports = {
 
   // 유저
   CREATE_USER_SUCCESS: "유저 생성 성공",
+  ALREADY_USER: "이미 있는 유저입니다",
   CREATE_USER_FAIL: "유저 생성 실패",
   GET_ALL_USERS_SUCCESS: "모든 유저 조회 성공",
   GET_ALL_USERS_FAIL: "모든 유저 조회 실패",
@@ -51,8 +48,9 @@ module.exports = {
   MATCHING_SUCCESS: "매칭 성공",
   NOT_CREATOR: "방장이 아닙니다",
 
-  /* 프로필 */
+  // 내 관계
   GET_MY_RELATIONS_SUCCESS: "내 관계 정보 조회 성공",
+  NOT_IN_ROOM: "해당 방에 입장하지 않았습니다",
 
   /* 토큰 */
   EMPTY_TOKEN: "토큰 값이 없습니다.",
