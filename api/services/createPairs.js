@@ -83,9 +83,6 @@ const data = [
   },
 ];
 
-// function checkIfDuplicateExists(w) {
-//   return new Set(w).size !== w.length;
-// }
 function checkIfDuplicateExists(arr) {
   const unique = [...new Set(arr.map((a) => JSON.stringify(a)))];
   const stringifiedArr = arr.map((a) => JSON.stringify(a));
@@ -114,63 +111,37 @@ const createPairs = (members) => {
   };
 
   let teams = [];
-  while (true) {
-    shuffleArray(tempMembers);
-    let team = {};
-    for (let i = 0; i < tempMembers.length; i++) {
-      if (i === tempMembers.length - 1) {
-        tempMembers[0].ManittoUserId = tempMembers[i].UserId;
-        tempMembers[i].SantaUserId = tempMembers[0].UserId;
-        team.manitto = tempMembers[i].UserId;
-        team.santa = tempMembers[0].UserId;
-      } else {
-        tempMembers[i].SantaUserId = tempMembers[i + 1].UserId;
-        tempMembers[i + 1].ManittoUserId = tempMembers[i].UserId;
-        team.manitto = tempMembers[i].UserId;
-        team.santa = tempMembers[i + 1].UserId;
-      }
-      // console.log(team);
-      teams.push({ ...team });
-    }
-    if (pairExists(teams)) {
-      // pastPairs.some(
-      //   (pair) =>
-      //     pair.manitto === team.manitto && pair.santa === team.santa,
-      // )
-      teams.length = 0;
-      // console.log("pastPairs", pastPairs);
-      // console.log("continue");
-      continue;
+  // while (true) {
+  shuffleArray(tempMembers);
+  let team = {};
+  for (let i = 0; i < tempMembers.length; i++) {
+    if (i === tempMembers.length - 1) {
+      tempMembers[0].ManittoUserId = tempMembers[i].UserId;
+      tempMembers[i].SantaUserId = tempMembers[0].UserId;
+      team.manitto = tempMembers[i].UserId;
+      team.santa = tempMembers[0].UserId;
     } else {
-      break;
+      tempMembers[i].SantaUserId = tempMembers[i + 1].UserId;
+      tempMembers[i + 1].ManittoUserId = tempMembers[i].UserId;
+      team.manitto = tempMembers[i].UserId;
+      team.santa = tempMembers[i + 1].UserId;
     }
+    teams.push({ ...team });
   }
+  //   if (pairExists(teams)) {
+  //     teams.length = 0;
+  //     continue;
+  //   } else {
+  //     break;
+  //   }
+  // }
 
   const teamsCopy = teams.map((t) => {
     return { ...t };
   });
   pastPairs.push(...teamsCopy);
   tempMembers.sort((a, b) => (a.UserId > b.UserId ? 1 : -1));
-  // matchedPairs.push(tempMembers);
-  // console.log("Pushed!");
-  // console.log("Matched Pairs length:", matchedPairs.length);
-  // console.log("pastPairs", pastPairs);
-  // console.log("pastPairs length", pastPairs.length);
   return tempMembers;
 };
-
-// console.log(createPairs(data));
-// console.log(createPairs(data));
-// console.log(createPairs(data));
-// createPairs(data);
-// for (let s = 0; s < 3; s++) {
-//   console.log("Matched pairs", createPairs(data));
-//   if (checkIfDuplicateExists(pastPairs)) {
-//     console.log("pastPairs 안에서 중복 발생!");
-//   }
-//   if (checkIfDuplicateExists(matchedPairs)) {
-//     console.log("MathcedPaires 안에서 중복 발생");
-//   }
-// }
 
 module.exports = createPairs;
