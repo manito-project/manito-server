@@ -11,9 +11,6 @@ userRouter.get("/", userController.getAllUsers);
 // Read a user by ID
 userRouter.get("/:userId", userController.getOneUser);
 
-// Update a user
-userRouter.put("/:userId");
-
 // Delete a user
 userRouter.delete("/:userId", userController.deleteUser);
 

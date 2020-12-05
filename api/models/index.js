@@ -45,7 +45,14 @@ db.User_Room.hasOne(db.User_Room, {
 });
 
 // User_Room & Mission
-db.User_Room.hasOne(db.Mission, { as: "RoomMission" });
-db.Mission.belongsTo(db.User_Room);
+db.Mission.hasMany(db.User_Room, {
+  // as: "Pair",
+  // as: "Member",
+  foreignKey: "PairMissionId",
+});
+db.User_Room.belongsTo(db.Mission, {
+  as: "MyMission",
+  foreignKey: "PairMissionId",
+});
 
 module.exports = db;

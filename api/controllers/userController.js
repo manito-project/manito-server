@@ -1,4 +1,4 @@
-const { User, Room } = require("../models");
+const { User, Room, User_Room } = require("../models");
 const jwt = require("../modules/jwt");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");

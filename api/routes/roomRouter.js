@@ -15,11 +15,15 @@ roomRouter.post("/enter", authMiddleware.checkToken, roomController.enterRoom);
 // Create pairs
 roomRouter.post("/match", authMiddleware.checkToken, roomController.matchPairs);
 
+// Show my relations
+roomRouter.get(
+  "/:roomId/my",
+  authMiddleware.checkToken,
+  roomController.getMyRelations,
+);
+
 // Read a room by ID
 roomRouter.get("/:roomId", roomController.getOneRoom);
-
-// Update a room
-// roomRouter.put("/");
 
 // Delete a room
 roomRouter.delete("/:roomId", roomController.deleteRoom);

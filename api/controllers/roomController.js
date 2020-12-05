@@ -228,37 +228,42 @@ module.exports = {
     }
   },
   matchPairs: async (req, res) => {
-    const { RoomId } = req.body;
+    const { roomId } = req.body;
     const { id: currentUserId } = req.user;
+    // const { currentUserId } = req.body;
     try {
       // const creator = await User.findOne({where:{userId }})
-      const room = await Room.findOne({ where: { id: RoomId } });
-      console.log(typeof room.creatorId);
+      const room = await Room.findOne({ where: { id: roomId } });
       if (room.creatorId !== currentUserId) {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NOT_CREATOR));
       }
       const members = await User_Room.findAll({
-        where: { RoomId },
+        where: { RoomId: roomId },
       });
       const dataBeforeMatching = members.map((member) => member.dataValues);
-      console.log(dataBeforeMatching);
+      // console.log(dataBeforeMatching);
       const dataAfterMatching = createPairs(dataBeforeMatching);
+      let roomMissions = await Mission.findAll({ where: { RoomId: roomId } });
       await Promise.all(
-        dataAfterMatching.map(
-          async (d) =>
-            await User_Room.update(
-              {
-                SantaUserId: d.SantaUserId,
-                ManittoUserId: d.ManittoUserId,
-              },
-              { where: { UserId: d.UserId } },
-            ),
-        ),
+        dataAfterMatching.map(async (d) => {
+          const randomIndex = Math.floor(Math.random() * roomMissions.length);
+          const member = await User_Room.findOne({
+            where: { UserId: d.UserId },
+          });
+          await member.update({
+            SantaUserId: d.SantaUserId,
+            ManittoUserId: d.ManittoUserId,
+          });
+          console.log(roomMissions[randomIndex]);
+          roomMissions[randomIndex].addUser_Room(member);
+        }),
       );
       const updatedMembers = await User_Room.findAll({
-        where: { RoomId },
+        where: { RoomId: roomId },
+        attributes: ["RoomId", "UserId", "SantaUserId", "ManittoUserId"],
+        include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
       // console.log(test);
       res
@@ -268,6 +273,45 @@ module.exports = {
             statusCode.OK,
             responseMessage.MATCHING_SUCCESS,
             updatedMembers,
+          ),
+        );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR,
+          ),
+        );
+    }
+  },
+  getMyRelations: async (req, res) => {
+    const { id: userId } = req.user;
+    const { roomId } = req.params;
+    try {
+      const myRelations = await User_Room.findOne({
+        where: { RoomId: roomId, UserId: userId },
+        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
+        include: [{ model: Mission, as: "PairMission" }],
+      });
+      // const myRelations = await User.findOne({
+      //   where: { id: userId },
+      //   attributes: ["id", "username"],
+      //   include: [
+      //     {
+      //       model: User_Room,
+      //     },
+      //   ],
+      // });
+      res
+        .status(statusCode.OK)
+        .send(
+          util.success(
+            statusCode.OK,
+            responseMessage.GET_MY_RELATIONS_SUCCESS,
+            myRelations,
           ),
         );
     } catch (error) {

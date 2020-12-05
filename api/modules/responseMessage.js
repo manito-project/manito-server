@@ -52,9 +52,7 @@ module.exports = {
   NOT_CREATOR: "방장이 아닙니다",
 
   /* 프로필 */
-  PROFILE_GET_SUCCESS: "프로필 기본정보 조회 성공",
-  PROFILE_POST_SUCCESS: "프로필 등록 성공",
-  PROFILE_POST_FAIL: "프로필 등록 실패",
+  GET_MY_RELATIONS_SUCCESS: "내 관계 정보 조회 성공",
 
   /* 토큰 */
   EMPTY_TOKEN: "토큰 값이 없습니다.",
