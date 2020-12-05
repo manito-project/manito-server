@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, Room } = require("../models");
 const jwt = require("../modules/jwt");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");
@@ -37,7 +37,7 @@ module.exports = {
   getAllUsers: async (req, res) => {
     try {
       const users = await User.findAll({
-        attributes: ["id", "username", "serialNumber"],
+        attributes: ["id", "username"],
       });
       if (!users) {
         return res
@@ -80,7 +80,15 @@ module.exports = {
     try {
       const user = await User.findOne({
         where: { id: userId },
-        attributes: ["id", "username", "serialNumber"],
+        attributes: ["id", "username"],
+        include: [
+          {
+            model: Room,
+            as: "JoinedRooms",
+            attributes: ["id", "roomName", "expiration"],
+            through: { attributes: [] },
+          },
+        ],
       });
       if (!user) {
         return res

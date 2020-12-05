@@ -25,21 +25,27 @@ db.Mission = require("./Mission")(sequelize, Sequelize);
 // 1 : N    User : Room
 db.User.hasMany(db.Room, {
   onDelete: "cascade",
-  // as: "Creator",
   foreignKey: "creatorId",
 });
-db.Room.belongsTo(db.User, { foreignKey: "creatorId" });
+db.Room.belongsTo(db.User, { foreignKey: "creatorId", as: "Creator" });
 
 // N : M    Member : Room
-db.User.belongsToMany(db.Room, { through: "User_Room" });
+db.User.belongsToMany(db.Room, { through: "User_Room", as: "JoinedRooms" });
 db.Room.belongsToMany(db.User, { through: "User_Room", as: "Members" });
 
 // 1 : N    Room : Mission
 db.Room.hasMany(db.Mission, { onDelete: "cascade", foreignKey: "roomId" });
 db.Mission.belongsTo(db.Room, { foreignKey: "roomId" });
 
-// Manito & Manitee
-db.User_Room.hasOne(db.User_Room, { as: "Manitto" });
-db.User_Room.hasOne(db.User_Room, { as: "Manittee" });
+// 1 : 1    Santa : Manitto
+db.User_Room.hasOne(db.User_Room, { as: "Santa", foreignKey: "SantaUserId" });
+db.User_Room.hasOne(db.User_Room, {
+  as: "Manitto",
+  foreignKey: "ManittoUserId",
+});
+
+// User_Room & Mission
+db.User_Room.hasOne(db.Mission, { as: "RoomMission" });
+db.Mission.belongsTo(db.User_Room);
 
 module.exports = db;

@@ -4,7 +4,7 @@ const updatePairs = async (newDetails) => {
   await newDetails.map(
     async (d) =>
       await User_Room.update(
-        { ManittoUserId: d.ManittoUserId, ManitteeUserId: d.ManitteeUserId },
+        { SantaUserId: d.SantaUserId, ManittoUserId: d.ManittoUserId },
         { where: { UserId: d.Userid } },
       ),
   );

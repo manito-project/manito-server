@@ -10,16 +10,16 @@ roomRouter.post("/", authMiddleware.checkToken, roomController.createRoom);
 roomRouter.get("/", roomController.getAllRooms);
 
 // Enter a room
-roomRouter.post("/enter", roomController.enterRoom);
+roomRouter.post("/enter", authMiddleware.checkToken, roomController.enterRoom);
 
 // Create pairs
-roomRouter.post("/match", roomController.matchPairs);
+roomRouter.post("/match", authMiddleware.checkToken, roomController.matchPairs);
 
 // Read a room by ID
 roomRouter.get("/:roomId", roomController.getOneRoom);
 
 // Update a room
-roomRouter.put("/");
+// roomRouter.put("/");
 
 // Delete a room
 roomRouter.delete("/:roomId", roomController.deleteRoom);

@@ -12,7 +12,7 @@ sequelize
   // .sync({ alter: true, force: true })
   .sync({ alter: false })
   .then(() => {
-    console.log("✅Connected to the database!");
+    console.log("✅ Connected to the database!");
   })
   .catch((error) => {
     console.log(error);

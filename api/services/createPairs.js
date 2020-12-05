@@ -6,80 +6,80 @@ const data = [
     RoomId: 1,
     // createdAt: "2020-12-03T12:33:06.000Z",
     // updatedAt: "2020-12-03T12:33:06.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 2,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 3,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 4,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 5,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 6,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 7,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 8,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 9,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
   {
     UserId: 10,
     RoomId: 1,
     // createdAt: "2020-12-03T12:34:59.000Z",
     // updatedAt: "2020-12-03T12:34:59.000Z",
+    SantaUserId: null,
     ManittoUserId: null,
-    ManitteeUserId: null,
   },
 ];
 
@@ -119,15 +119,15 @@ const createPairs = (members) => {
     let team = {};
     for (let i = 0; i < tempMembers.length; i++) {
       if (i === tempMembers.length - 1) {
-        tempMembers[0].ManitteeUserId = tempMembers[i].UserId;
-        tempMembers[i].ManittoUserId = tempMembers[0].UserId;
-        team.manittee = tempMembers[i].UserId;
-        team.manitto = tempMembers[0].UserId;
+        tempMembers[0].ManittoUserId = tempMembers[i].UserId;
+        tempMembers[i].SantaUserId = tempMembers[0].UserId;
+        team.manitto = tempMembers[i].UserId;
+        team.santa = tempMembers[0].UserId;
       } else {
-        tempMembers[i].ManittoUserId = tempMembers[i + 1].UserId;
-        tempMembers[i + 1].ManitteeUserId = tempMembers[i].UserId;
-        team.manittee = tempMembers[i].UserId;
-        team.manitto = tempMembers[i + 1].UserId;
+        tempMembers[i].SantaUserId = tempMembers[i + 1].UserId;
+        tempMembers[i + 1].ManittoUserId = tempMembers[i].UserId;
+        team.manitto = tempMembers[i].UserId;
+        team.santa = tempMembers[i + 1].UserId;
       }
       // console.log(team);
       teams.push({ ...team });
@@ -135,7 +135,7 @@ const createPairs = (members) => {
     if (pairExists(teams)) {
       // pastPairs.some(
       //   (pair) =>
-      //     pair.manittee === team.manittee && pair.manitto === team.manitto,
+      //     pair.manitto === team.manitto && pair.santa === team.santa,
       // )
       teams.length = 0;
       // console.log("pastPairs", pastPairs);

@@ -30,6 +30,7 @@ module.exports = {
   GET_ONE_USER_FAIL: "유저 조회 실패",
   DELETE_USER_SUCCESS: "유저 삭제 성공",
   DELETE_USER_FAIL: "유저 삭제 실패",
+  LOGIN_REQUIRED: "로그인이 필요합니다",
 
   // 방
   CREATE_ROOM_SUCCESS: "방 생성 성공",
@@ -43,10 +44,12 @@ module.exports = {
 
   // 방 입장
   ROOM_ENTER_SUCCESS: "방 입장 성공",
+  DUPLICATE_MEMBER: "이미 있는 멤버입니다",
   INVALID_CODE: "초대코드가 잘못되었습니다",
 
   // 마니또 매칭
   MATCHING_SUCCESS: "매칭 성공",
+  NOT_CREATOR: "방장이 아닙니다",
 
   /* 프로필 */
   PROFILE_GET_SUCCESS: "프로필 기본정보 조회 성공",

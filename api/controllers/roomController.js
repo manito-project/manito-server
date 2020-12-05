@@ -6,12 +6,11 @@ const createPairs = require("../services/createPairs");
 const generateCode = require("../services/generateCode");
 
 // TODO: user authentication
-// TODO: get user(creator) and add it to the room
+// TODO: Data validation
 module.exports = {
   createRoom: async (req, res) => {
-    const { roomName, expiration } = req.body;
+    const { roomName, expiration, missionContents } = req.body;
     const invitationCode = generateCode();
-    const { missionContents } = req.body;
     const { id: userId } = req.user;
     try {
       const user = await User.findOne({ where: { id: userId } });
@@ -109,15 +108,23 @@ module.exports = {
         where: { id: roomId },
         attributes: ["id", "roomName", "expiration", "invitationCode"],
         include: [
-          // {
-          //   model: Mission,
-          //   attributes: ["id", "content", "roomId"],
-          // },
-          { model: User },
+          {
+            model: User,
+            as: "Creator",
+            attributes: ["id", "username", "serialNumber"],
+          },
+          {
+            model: Mission,
+            attributes: ["id", "content"],
+          },
           {
             model: User,
             as: "Members",
             attributes: ["id", "username"],
+            through: {
+              as: "relations",
+              attributes: ["SantaUserId", "ManittoUserId"],
+            },
           },
         ],
       });
@@ -175,7 +182,7 @@ module.exports = {
   },
   enterRoom: async (req, res) => {
     const { invitationCode } = req.body;
-    const { UserId } = req.body;
+    const { id: UserId } = req.user;
 
     try {
       const room = await Room.findOne({
@@ -188,15 +195,26 @@ module.exports = {
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.INVALID_CODE));
       }
       const RoomId = room.id;
-      // const UserId = "2";
-      console.log(room);
-      const newMember = await User_Room.create({ RoomId, UserId });
-      res.status(statusCode.OK).send(
-        util.success(statusCode.OK, responseMessage.ROOM_ENTER_SUCCESS, {
-          room,
-          newMember,
-        }),
-      );
+      const [newMember, created] = await User_Room.findOrCreate({
+        where: {
+          RoomId,
+          UserId,
+        },
+      });
+      if (!created) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(
+            util.fail(statusCode.BAD_REQUEST, responseMessage.DUPLICATE_MEMBER),
+          );
+      } else {
+        return res.status(statusCode.OK).send(
+          util.success(statusCode.OK, responseMessage.ROOM_ENTER_SUCCESS, {
+            room,
+            newMember,
+          }),
+        );
+      }
     } catch (error) {
       console.log(error);
       res
@@ -211,21 +229,29 @@ module.exports = {
   },
   matchPairs: async (req, res) => {
     const { RoomId } = req.body;
+    const { id: currentUserId } = req.user;
     try {
+      // const creator = await User.findOne({where:{userId }})
+      const room = await Room.findOne({ where: { id: RoomId } });
+      console.log(typeof room.creatorId);
+      if (room.creatorId !== currentUserId) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NOT_CREATOR));
+      }
       const members = await User_Room.findAll({
         where: { RoomId },
       });
-      const oldData = members.map((member) => member.dataValues);
-      // console.log(cleanData);
-      const newData = createPairs(oldData);
-      console.log(newData);
+      const dataBeforeMatching = members.map((member) => member.dataValues);
+      console.log(dataBeforeMatching);
+      const dataAfterMatching = createPairs(dataBeforeMatching);
       await Promise.all(
-        newData.map(
+        dataAfterMatching.map(
           async (d) =>
             await User_Room.update(
               {
+                SantaUserId: d.SantaUserId,
                 ManittoUserId: d.ManittoUserId,
-                ManitteeUserId: d.ManitteeUserId,
               },
               { where: { UserId: d.UserId } },
             ),
