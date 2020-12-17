@@ -158,7 +158,7 @@ module.exports = {
     }
   },
   checkSerial: async (req, res) => {
-    const { serialNumber } = req.body;
+    const { serialNumber } = req.params;
     if (!serialNumber) {
       return res
         .status(statusCode.BAD_REQUREST)
@@ -171,13 +171,11 @@ module.exports = {
       });
       console.log(user);
       if (!user) {
-        return res
-          .status(statusCode.OK)
-          .send(
-            util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
-              serialNumber,
-            }),
-          );
+        return res.status(statusCode.OK).send(
+          util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
+            serialNumber,
+          }),
+        );
       }
       res
         .status(statusCode.OK)
