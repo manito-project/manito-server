@@ -9,8 +9,8 @@ const { sequelize } = require("./api/models");
 var indexRouter = require("./api/routes/index");
 
 sequelize
-  .sync({ alter: true, force: true })
-  // .sync({ alter: false })
+  // .sync({ alter: true, force: true })
+  .sync({ alter: false })
   .then(() => {
     console.log("✅ Connected to the database!");
   })

@@ -8,6 +8,9 @@ userRouter.post("/", userController.signin);
 // Read all users
 userRouter.get("/", userController.getAllUsers);
 
+// Check if a serial number is registered
+userRouter.get("/check-serial", userController.checkSerial);
+
 // Read a user by ID
 userRouter.get("/:userId", userController.getOneUser);
 

@@ -28,6 +28,8 @@ module.exports = {
   DELETE_USER_SUCCESS: "유저 삭제 성공",
   DELETE_USER_FAIL: "유저 삭제 실패",
   LOGIN_REQUIRED: "로그인이 필요합니다",
+  SERIAL_NUMBER_EXISTS: "해당 시리얼 넘버를 가진 유저가 있습니다",
+  NO_SUCH_SERIAL_NUMBER: "해당 시리얼 넘버를 가진 유저가 없습니다",
 
   // 방
   CREATE_ROOM_SUCCESS: "방 생성 성공",

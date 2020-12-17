@@ -157,4 +157,47 @@ module.exports = {
         );
     }
   },
+  checkSerial: async (req, res) => {
+    const { serialNumber } = req.body;
+    if (!serialNumber) {
+      return res
+        .status(statusCode.BAD_REQUREST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+    try {
+      const user = await User.findOne({
+        where: { serialNumber },
+        attributes: ["id", "username", "serialNumber"],
+      });
+      console.log(user);
+      if (!user) {
+        return res
+          .status(statusCode.OK)
+          .send(
+            util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
+              serialNumber,
+            }),
+          );
+      }
+      res
+        .status(statusCode.OK)
+        .send(
+          util.success(
+            statusCode.OK,
+            responseMessage.SERIAL_NUMBER_EXISTS,
+            user,
+          ),
+        );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR,
+          ),
+        );
+    }
+  },
 };
