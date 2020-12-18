@@ -169,7 +169,7 @@ module.exports = {
         where: { serialNumber },
         attributes: ["id", "username", "serialNumber"],
       });
-      console.log(user);
+      // console.log(user);
       if (!user) {
         return res.status(statusCode.OK).send(
           util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
@@ -177,15 +177,13 @@ module.exports = {
           }),
         );
       }
-      res
-        .status(statusCode.OK)
-        .send(
-          util.success(
-            statusCode.OK,
-            responseMessage.SERIAL_NUMBER_EXISTS,
-            user,
-          ),
-        );
+      const { accessToken } = await jwt.sign(user);
+      res.status(statusCode.OK).send(
+        util.success(statusCode.OK, responseMessage.SERIAL_NUMBER_EXISTS, {
+          user,
+          accessToken,
+        }),
+      );
     } catch (error) {
       console.log(error);
       res
