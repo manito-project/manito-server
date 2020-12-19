@@ -244,6 +244,7 @@ module.exports = {
   },
   matchPairs: async (req, res) => {
     const { roomId } = req.body;
+    console.log(roomId);
     const { id: currentUserId } = req.user;
     // const { currentUserId } = req.body;
     try {
@@ -264,13 +265,12 @@ module.exports = {
         dataAfterMatching.map(async (d) => {
           const randomIndex = Math.floor(Math.random() * roomMissions.length);
           const member = await User_Room.findOne({
-            where: { UserId: d.UserId },
+            where: { RoomId: roomId, UserId: d.UserId },
           });
           await member.update({
             SantaUserId: d.SantaUserId,
             ManittoUserId: d.ManittoUserId,
           });
-          console.log(roomMissions[randomIndex]);
           if (roomMissions.length !== 0) {
             roomMissions[randomIndex].addUser_Room(member);
           }
@@ -305,6 +305,7 @@ module.exports = {
   getMyRelations: async (req, res) => {
     const { id: userId } = req.user;
     const { roomId } = req.params;
+    console.log(userId);
     try {
       const myRelations = await User_Room.findOne({
         where: { RoomId: roomId, UserId: userId },
@@ -316,13 +317,20 @@ module.exports = {
           .status(statusCode.NOT_FOUND)
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       }
+      const santa = await User_Room.findOne({
+        where: { RoomId: roomId, UserId: myRelations.SantaUserId },
+        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
+        include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
+      });
+      const MissionToMe = santa.dataValues.MyMission;
+      console.log("santa", santa);
       res
         .status(statusCode.OK)
         .send(
           util.success(
             statusCode.OK,
             responseMessage.GET_MY_RELATIONS_SUCCESS,
-            myRelations,
+            { ...myRelations.dataValues, MissionToMe },
           ),
         );
     } catch (error) {
