@@ -132,19 +132,12 @@ module.exports = {
   deleteUser: async (req, res) => {
     const { userId } = req.params;
     try {
-      const deletedUser = await User.destroy({
+      await User.destroy({
         where: { id: userId },
-        attributes: ["id", "username", "serialNumber"],
       });
       res
         .status(statusCode.OK)
-        .send(
-          util.success(
-            statusCode.OK,
-            responseMessage.DELETE_USER_SUCCESS,
-            deletedUser,
-          ),
-        );
+        .send(util.success(statusCode.OK, responseMessage.DELETE_USER_SUCCESS));
     } catch (error) {
       console.log(error);
       res
