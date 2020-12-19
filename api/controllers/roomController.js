@@ -44,12 +44,6 @@ module.exports = {
         );
     } catch (error) {
       console.log(error);
-      // Handle unique constraint error if there is any
-      //   if (error instanceof UniqueConstraintError) {
-      //     await this.createRoom();
-      //   } else {
-      //   console.log(Object.getPrototypeOf(error));
-      //   console.log(error.constructor);
       res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(
@@ -112,7 +106,13 @@ module.exports = {
     try {
       const room = await Room.findOne({
         where: { id: roomId },
-        attributes: ["id", "roomName", "expiration", "invitationCode"],
+        attributes: [
+          "id",
+          "roomName",
+          "expiration",
+          "invitationCode",
+          "isMatchingDone",
+        ],
         include: [
           {
             model: User,
@@ -281,6 +281,7 @@ module.exports = {
         attributes: ["UserId", "SantaUserId", "ManittoUserId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
+      await room.update({ isMatchingDone: true });
       res
         .status(statusCode.OK)
         .send(
