@@ -307,7 +307,7 @@ module.exports = {
     const { roomId } = req.params;
     try {
       const myRelations = await User_Room.findOne({
-        where: { RoomId: roomId, UserId: "z" },
+        where: { RoomId: roomId, UserId: userId },
         attributes: ["UserId", "SantaUserId", "ManittoUserId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
