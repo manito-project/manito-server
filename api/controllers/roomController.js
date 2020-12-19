@@ -323,7 +323,10 @@ module.exports = {
         attributes: ["UserId", "SantaUserId", "ManittoUserId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
-      const MissionToMe = santa.dataValues.MyMission;
+      let MissionToMe = null;
+      if (santa) {
+        MissionToMe = santa.dataValues.MyMission;
+      }
       console.log("santa", santa);
       res
         .status(statusCode.OK)
