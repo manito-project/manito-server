@@ -320,25 +320,34 @@ module.exports = {
           .status(statusCode.NOT_FOUND)
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       }
-      const santa = await User_Room.findOne({
+      const santaMember = await User_Room.findOne({
         where: { RoomId: roomId, UserId: myRelations.SantaUserId },
-        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
       let MissionToMe = null;
-      if (santa) {
-        MissionToMe = santa.dataValues.MyMission;
+      let SantaUsername = null;
+      if (santaMember) {
+        MissionToMe = santaMember.dataValues.MyMission;
+        const santaUser = await User.findOne({
+          where: { id: myRelations.SantaUserId },
+        });
+        SantaUsername = santaUser.dataValues.username;
       }
-      console.log("santa", santa);
-      res
-        .status(statusCode.OK)
-        .send(
-          util.success(
-            statusCode.OK,
-            responseMessage.GET_MY_RELATIONS_SUCCESS,
-            { ...myRelations.dataValues, MissionToMe },
-          ),
-        );
+      let ManittoUsername = null;
+      const manittoUser = await User.findOne({
+        where: { id: myRelations.ManittoUserId },
+      });
+      if (manittoUser) {
+        ManittoUsername = manittoUser.dataValues.username;
+      }
+      res.status(statusCode.OK).send(
+        util.success(statusCode.OK, responseMessage.GET_MY_RELATIONS_SUCCESS, {
+          ...myRelations.dataValues,
+          MissionToMe,
+          SantaUsername,
+          ManittoUsername,
+        }),
+      );
     } catch (error) {
       console.log(error);
       res
