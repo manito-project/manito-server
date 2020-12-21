@@ -93,7 +93,13 @@ module.exports = {
           {
             model: Room,
             as: "JoinedRooms",
-            attributes: ["id", "roomName", "expiration", "isMatchingDone"],
+            attributes: [
+              "id",
+              "roomName",
+              "isMatchingDone",
+              "expiration",
+              "createdAt",
+            ],
             through: { attributes: [] },
           },
         ],

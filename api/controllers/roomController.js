@@ -60,9 +60,10 @@ module.exports = {
         attributes: [
           "id",
           "roomName",
-          "expiration",
           "invitationCode",
           "creatorId",
+          "expiration",
+          "createdAt",
         ],
       });
       if (!rooms) {
@@ -109,9 +110,10 @@ module.exports = {
         attributes: [
           "id",
           "roomName",
-          "expiration",
           "invitationCode",
           "isMatchingDone",
+          "expiration",
+          "createdAt",
         ],
         include: [
           {
