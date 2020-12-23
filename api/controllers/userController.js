@@ -1,8 +1,9 @@
-const { User, Room, User_Room } = require("../models");
+const { User, Room, User_Room, Mission } = require("../models");
 const jwt = require("../modules/jwt");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");
 const util = require("../modules/util");
+const generateCode = require("../services/generateCode");
 
 // TODO: populate rooms
 module.exports = {
@@ -25,6 +26,32 @@ module.exports = {
           .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_USER));
       }
       const { accessToken } = await jwt.sign(user);
+      // Begin Apple App TEST
+      const roomName = `${username}'s room`;
+      const expiration = "2020-12-30 00:00:00";
+      const invitationCode = generateCode();
+      const room = await Room.create({ roomName, expiration, invitationCode });
+      const missionContents = [
+        "mission 1",
+        "mission 2",
+        "mission 3",
+        "mission 4",
+      ];
+      missionContents.map(async (content) => {
+        const mission = await Mission.create({ content });
+        await room.addMission(mission);
+      });
+      const allUsers = await User.findAll();
+      allUsers.map(async (u) => {
+        await User_Room.create({
+          RoomId: room.id,
+          UserId: u.id,
+        });
+      });
+
+      await user.addRoom(room);
+      // await User_Room.create({ RoomId: room.id, UserId: user.id });
+      // End TEST
       res.status(statusCode.OK).send(
         util.success(statusCode.OK, responseMessage.CREATE_USER_SUCCESS, {
           ...user.dataValues,
