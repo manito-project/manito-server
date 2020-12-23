@@ -44,7 +44,7 @@ db.User_Room.hasOne(db.User_Room, {
   foreignKey: "ManittoUserId",
 });
 
-// User_Room & Mission
+// 1 : N    Mission : User_Room
 db.Mission.hasMany(db.User_Room, {
   // as: "Pair",
   // as: "Member",

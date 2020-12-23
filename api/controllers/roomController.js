@@ -248,9 +248,7 @@ module.exports = {
     const { roomId } = req.body;
     console.log(roomId);
     const { id: currentUserId } = req.user;
-    // const { currentUserId } = req.body;
     try {
-      // const creator = await User.findOne({where:{userId }})
       const room = await Room.findOne({ where: { id: roomId } });
       if (room.creatorId !== currentUserId) {
         return res
@@ -260,27 +258,35 @@ module.exports = {
       const members = await User_Room.findAll({
         where: { RoomId: roomId },
       });
+
+      // 마니또 & 산타 매칭
       const dataBeforeMatching = members.map((member) => member.dataValues);
       const dataAfterMatching = createPairs(dataBeforeMatching);
-      let roomMissions = await Mission.findAll({ where: { RoomId: roomId } });
+      // console.log("dataAfterMatching", dataAfterMatching);
+
+      // 미션 매칭
+      let roomMissions = await Mission.findAll({ where: { roomId } });
+      // console.log("roomMissions", roomMissions);
       await Promise.all(
         dataAfterMatching.map(async (d) => {
           const randomIndex = Math.floor(Math.random() * roomMissions.length);
-          const member = await User_Room.findOne({
-            where: { RoomId: roomId, UserId: d.UserId },
-          });
-          await member.update({
+          const options = {
             SantaUserId: d.SantaUserId,
             ManittoUserId: d.ManittoUserId,
+            PairMissionId:
+              roomMissions.length === 0 ? null : roomMissions[randomIndex].id,
+          };
+
+          await User_Room.update(options, {
+            where: { RoomId: roomId, UserId: d.UserId },
           });
-          if (roomMissions.length !== 0) {
-            roomMissions[randomIndex].addUser_Room(member);
-          }
+          console.log("options", options);
         }),
       );
+      // console.log("roomId", roomId);
       const updatedMembers = await User_Room.findAll({
         where: { RoomId: roomId },
-        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
+        attributes: ["UserId", "SantaUserId", "ManittoUserId", "RoomId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
       await room.update({ isMatchingDone: true });
@@ -312,7 +318,7 @@ module.exports = {
     try {
       const myRelations = await User_Room.findOne({
         where: { RoomId: roomId, UserId: userId },
-        attributes: ["UserId", "SantaUserId", "ManittoUserId"],
+        // attributes: ["UserId", "SantaUserId", "ManittoUserId", "RoomId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
       if (!myRelations) {
