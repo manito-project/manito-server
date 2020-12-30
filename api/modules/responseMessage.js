@@ -45,6 +45,7 @@ module.exports = {
   ROOM_ENTER_SUCCESS: "방 입장 성공",
   DUPLICATE_MEMBER: "이미 있는 멤버입니다",
   INVALID_CODE: "초대코드가 잘못되었습니다",
+  ALREADY_MATCHED: "이미 매칭이 완료된 방입니다",
 
   // 마니또 매칭
   MATCHING_SUCCESS: "매칭 성공",

@@ -200,12 +200,25 @@ module.exports = {
     try {
       const room = await Room.findOne({
         where: { invitationCode },
-        attributes: ["id", "roomName", "expiration", "invitationCode"],
+        attributes: [
+          "id",
+          "roomName",
+          "expiration",
+          "invitationCode",
+          "isMatchingDone",
+        ],
       });
       if (!room) {
         return res
           .status(statusCode.NOT_FOUND)
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.INVALID_CODE));
+      }
+      if (room.isMatchingDone) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(
+            util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED),
+          );
       }
       const RoomId = room.id;
       const [_, created] = await User_Room.findOrCreate({
