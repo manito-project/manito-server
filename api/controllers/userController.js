@@ -27,29 +27,29 @@ module.exports = {
       }
       const { accessToken } = await jwt.sign(user);
       // Begin Apple App TEST
-      const roomName = `${username}'s room`;
-      const expiration = "2020-12-30 00:00:00";
-      const invitationCode = generateCode();
-      const room = await Room.create({ roomName, expiration, invitationCode });
-      const missionContents = [
-        "mission 1",
-        "mission 2",
-        "mission 3",
-        "mission 4",
-      ];
-      missionContents.map(async (content) => {
-        const mission = await Mission.create({ content });
-        await room.addMission(mission);
-      });
-      const allUsers = await User.findAll();
-      allUsers.map(async (u) => {
-        await User_Room.create({
-          RoomId: room.id,
-          UserId: u.id,
-        });
-      });
+      // const roomName = `${username}'s room`;
+      // const expiration = "2020-12-30 00:00:00";
+      // const invitationCode = generateCode();
+      // const room = await Room.create({ roomName, expiration, invitationCode });
+      // const missionContents = [
+      //   "mission 1",
+      //   "mission 2",
+      //   "mission 3",
+      //   "mission 4",
+      // ];
+      // missionContents.map(async (content) => {
+      //   const mission = await Mission.create({ content });
+      //   await room.addMission(mission);
+      // });
+      // const allUsers = await User.findAll();
+      // allUsers.map(async (u) => {
+      //   await User_Room.create({
+      //     RoomId: room.id,
+      //     UserId: u.id,
+      //   });
+      // });
 
-      await user.addRoom(room);
+      // await user.addRoom(room);
       // await User_Room.create({ RoomId: room.id, UserId: user.id });
       // End TEST
       res.status(statusCode.OK).send(
