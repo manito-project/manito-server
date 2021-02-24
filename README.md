@@ -1,3 +1,5 @@
+![Untitled-min](https://user-images.githubusercontent.com/29723695/109048755-c8ffe280-771a-11eb-8210-b348c8d6669b.png)
+
 ### 우리 모임 아이스브레이킹의 시작,
 산타마니또
 
