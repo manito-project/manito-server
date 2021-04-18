@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --exec ./bin/www"
+    "start": "nodemon --exec ./bin/www",
+    "deploy": "pm2 delete manito-server || : && cross-env NODE_ENV=production pm2 start ./bin/www --name manito-server"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
