@@ -6,7 +6,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(200),
         allowNull: false,
       },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
-    { freezeTableName: true, timestamps: true },
+    { freezeTableName: true, timestamps: true }
   );
 };

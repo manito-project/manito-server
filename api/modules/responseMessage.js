@@ -25,9 +25,12 @@ module.exports = {
   GET_ALL_USERS_FAIL: "모든 유저 조회 실패",
   GET_ONE_USER_SUCCESS: "유저 조회 성공",
   GET_ONE_USER_FAIL: "유저 조회 실패",
+  UPDATE_USER_SUCCESS: "유저 수정 성공",
+  UPDATE_USER_FAIL: "유저 수정 실패",
   DELETE_USER_SUCCESS: "유저 삭제 성공",
   DELETE_USER_FAIL: "유저 삭제 실패",
   LOGIN_REQUIRED: "로그인이 필요합니다",
+  NOT_AUTHORIZED: "권한이 없습니다",
   SERIAL_NUMBER_EXISTS: "해당 시리얼 넘버를 가진 유저가 있습니다",
   NO_SUCH_SERIAL_NUMBER: "해당 시리얼 넘버를 가진 유저가 없습니다",
 
@@ -38,11 +41,16 @@ module.exports = {
   GET_ALL_ROOMS_FAIL: "모든 방 조회 실패",
   GET_ONE_ROOM_SUCCESS: "방 조회 성공",
   GET_ONE_ROOM_FAIL: "방 조회 실패",
+  UPDATE_ROOM_SUCCESS: "방 수정 성공",
+  UPDATE_ROOM_FAIL: "방 수정 실패. 존재하지 않는 방입니다.",
   DELETE_ROOM_SUCCESS: "방 삭제 성공",
   DELETE_ROOM_FAIL: "방 삭제 실패",
 
   // 방 입장
   ROOM_ENTER_SUCCESS: "방 입장 성공",
+  ROOM_EXIT_SUCCESS: "방 나가기 성공",
+  ROOM_EXPLODE_SUCCESS: "방 폭파 성공",
+  NOT_IN_ROOM: "해당 방에 입장하지 않았습니다",
   DUPLICATE_MEMBER: "이미 있는 멤버입니다",
   INVALID_CODE: "초대코드가 잘못되었습니다",
   ALREADY_MATCHED: "이미 매칭이 완료된 방입니다",
@@ -53,7 +61,6 @@ module.exports = {
 
   // 내 관계
   GET_MY_RELATIONS_SUCCESS: "내 관계 정보 조회 성공",
-  NOT_IN_ROOM: "해당 방에 입장하지 않았습니다",
 
   /* 토큰 */
   EMPTY_TOKEN: "토큰 값이 없습니다.",

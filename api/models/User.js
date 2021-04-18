@@ -10,10 +10,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(400),
         allowNull: false,
       },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       freezeTableName: true,
       timestamps: true,
-    },
+    }
   );
 };

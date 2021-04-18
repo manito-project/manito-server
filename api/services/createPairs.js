@@ -1,117 +1,14 @@
+const shuffleArray = require("./shuffleArray");
+
 // TODO: Connect past pairs to database
-
-const data = [
-  {
-    UserId: 1,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:33:06.000Z",
-    // updatedAt: "2020-12-03T12:33:06.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 2,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 3,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 4,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 5,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 6,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 7,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 8,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 9,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-  {
-    UserId: 10,
-    RoomId: 1,
-    // createdAt: "2020-12-03T12:34:59.000Z",
-    // updatedAt: "2020-12-03T12:34:59.000Z",
-    SantaUserId: null,
-    ManittoUserId: null,
-  },
-];
-
-function checkIfDuplicateExists(arr) {
-  const unique = [...new Set(arr.map((a) => JSON.stringify(a)))];
-  const stringifiedArr = arr.map((a) => JSON.stringify(a));
-  return unique.length !== stringifiedArr.length;
-}
-
-const matchedPairs = [];
-
 const pastPairs = [];
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
 const createPairs = (members) => {
   let tempMembers = members.map((m) => {
     return { ...m };
   });
-  const pairExists = (currentTeams) => {
-    const stringifiedTeams = currentTeams.map((t) => JSON.stringify({ ...t }));
-    const stringifiedPastPairs = pastPairs.map((p) => JSON.stringify({ ...p }));
-    return stringifiedTeams.some((st) => stringifiedPastPairs.includes(st));
-  };
 
   let teams = [];
-  // while (true) {
   shuffleArray(tempMembers);
   let team = {};
   for (let i = 0; i < tempMembers.length; i++) {
@@ -128,13 +25,6 @@ const createPairs = (members) => {
     }
     teams.push({ ...team });
   }
-  //   if (pairExists(teams)) {
-  //     teams.length = 0;
-  //     continue;
-  //   } else {
-  //     break;
-  //   }
-  // }
 
   const teamsCopy = teams.map((t) => {
     return { ...t };

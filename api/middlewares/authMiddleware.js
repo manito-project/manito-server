@@ -25,14 +25,14 @@ module.exports = {
       return res
         .status(statusCode.UNAUTHORIZED)
         .send(
-          util.fail(statusCode.UNAUTHORIZED, responseMessage.EXPIRED_TOKEN),
+          util.fail(statusCode.UNAUTHORIZED, responseMessage.EXPIRED_TOKEN)
         );
     }
     if (user === TOKEN_INVALID) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .send(
-          util.fail(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN),
+          util.fail(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN)
         );
     }
 
@@ -43,7 +43,13 @@ module.exports = {
         .status(statusCode.UNAUTHORIZED)
         .send(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
     } else {
-      const userInfo = await User.findOne({ where: { id: userId } });
+      const userInfo = await User.findOne({
+        where: { id: userId, isDeleted: false },
+      });
+      if (!userInfo)
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
       //   console.log(userInfo);
       req.user = userInfo;
       next();

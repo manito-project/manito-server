@@ -56,7 +56,7 @@ module.exports = {
         util.success(statusCode.OK, responseMessage.CREATE_USER_SUCCESS, {
           ...user.dataValues,
           accessToken,
-        }),
+        })
       );
     } catch (error) {
       console.log(error);
@@ -65,8 +65,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -75,6 +75,7 @@ module.exports = {
     try {
       const users = await User.findAll({
         attributes: ["id", "username"],
+        where: { isDeleted: false },
       });
       if (!users) {
         return res
@@ -82,8 +83,8 @@ module.exports = {
           .send(
             util.fail(
               statusCode.BAD_REQUEST,
-              responseMessage.GET_ALL_USERS_FAIL,
-            ),
+              responseMessage.GET_ALL_USERS_FAIL
+            )
           );
       }
       res
@@ -92,8 +93,8 @@ module.exports = {
           util.success(
             statusCode.OK,
             responseMessage.GET_ALL_USERS_SUCCESS,
-            users,
-          ),
+            users
+          )
         );
     } catch (error) {
       console.log(error);
@@ -102,8 +103,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -114,7 +115,7 @@ module.exports = {
 
     try {
       const user = await User.findOne({
-        where: { id: userId },
+        where: { id: userId, isDeleted: false },
         attributes: ["id", "username"],
         include: [
           {
@@ -135,10 +136,7 @@ module.exports = {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(
-            util.fail(
-              statusCode.BAD_REQUEST,
-              responseMessage.GET_ONE_USER_FAIL,
-            ),
+            util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ONE_USER_FAIL)
           );
       }
       res
@@ -147,8 +145,8 @@ module.exports = {
           util.success(
             statusCode.OK,
             responseMessage.GET_ONE_USER_SUCCESS,
-            user,
-          ),
+            user
+          )
         );
     } catch (error) {
       console.log(error);
@@ -157,17 +155,60 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
+        );
+    }
+  },
+  updateUser: async (req, res) => {
+    const { userId } = req.params;
+    const { username } = req.body;
+    if (!username) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+    try {
+      if (+userId !== +req.user.id)
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(
+            util.fail(statusCode.FORBIDDEN, responseMessage.NOT_AUTHORIZED)
+          );
+      const user = await User.findOne({
+        where: { id: userId, isDeleted: false },
+      });
+      if (!user)
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(
+            util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_USER_FAIL)
+          );
+      user.username = username || user.username;
+      await user.save();
+      res
+        .status(statusCode.OK)
+        .send(
+          util.success(statusCode.OK, responseMessage.UPDATE_USER_SUCCESS, user)
+        );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
   deleteUser: async (req, res) => {
     const { userId } = req.params;
     try {
-      await User.destroy({
-        where: { id: userId },
-      });
+      const user = await User.findOne({ where: { id: userId } });
+      user.isDeleted = true;
+      await user.save();
       res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.DELETE_USER_SUCCESS));
@@ -178,8 +219,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -192,7 +233,7 @@ module.exports = {
     }
     try {
       const user = await User.findOne({
-        where: { serialNumber },
+        where: { serialNumber, isDeleted: false },
         attributes: ["id", "username", "serialNumber"],
       });
       // console.log(user);
@@ -200,7 +241,7 @@ module.exports = {
         return res.status(statusCode.OK).send(
           util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
             serialNumber,
-          }),
+          })
         );
       }
       const { accessToken } = await jwt.sign(user);
@@ -208,7 +249,7 @@ module.exports = {
         util.success(statusCode.OK, responseMessage.SERIAL_NUMBER_EXISTS, {
           user,
           accessToken,
-        }),
+        })
       );
     } catch (error) {
       console.log(error);
@@ -217,8 +258,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },

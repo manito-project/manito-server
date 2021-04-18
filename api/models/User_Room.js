@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
       },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
       // MissionId: {
       //   type: DataTypes.INTEGER,
       //   reference: {
@@ -28,6 +32,6 @@ module.exports = (sequelize, DataTypes) => {
       //   },
       // },
     },
-    { freezeTableName: true, timestamps: true },
+    { freezeTableName: true, timestamps: true }
   );
 };

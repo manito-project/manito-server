@@ -1,9 +1,11 @@
+const Op = require("sequelize/lib/operators");
 const { Room, User, User_Room, Mission } = require("../models");
 const responseMessage = require("../modules/responseMessage");
 const statusCode = require("../modules/statusCode");
 const util = require("../modules/util");
 const createPairs = require("../services/createPairs");
 const generateCode = require("../services/generateCode");
+const shuffleArray = require("../services/shuffleArray");
 
 // TODO: user authentication
 // TODO: Data validation
@@ -19,7 +21,9 @@ module.exports = {
     const { id: userId } = req.user;
 
     try {
-      const user = await User.findOne({ where: { id: userId } });
+      const user = await User.findOne({
+        where: { id: userId, isDeleted: false },
+      });
       const room = await Room.create({
         roomName,
         expiration,
@@ -36,11 +40,7 @@ module.exports = {
       res
         .status(statusCode.OK)
         .send(
-          util.success(
-            statusCode.OK,
-            responseMessage.CREATE_ROOM_SUCCESS,
-            room,
-          ),
+          util.success(statusCode.OK, responseMessage.CREATE_ROOM_SUCCESS, room)
         );
     } catch (error) {
       console.log(error);
@@ -49,8 +49,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -65,6 +65,7 @@ module.exports = {
           "expiration",
           "createdAt",
         ],
+        where: { isDeleted: false },
       });
       if (!rooms) {
         return res
@@ -72,8 +73,8 @@ module.exports = {
           .send(
             util.fail(
               statusCode.BAD_REQUEST,
-              responseMessage.GET_ALL_ROOMS_FAIL,
-            ),
+              responseMessage.GET_ALL_ROOMS_FAIL
+            )
           );
       }
       console.log(rooms);
@@ -84,8 +85,8 @@ module.exports = {
           util.success(
             statusCode.OK,
             responseMessage.GET_ALL_ROOMS_SUCCESS,
-            rooms,
-          ),
+            rooms
+          )
         );
     } catch (error) {
       console.log(error);
@@ -94,8 +95,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -106,7 +107,7 @@ module.exports = {
 
     try {
       const room = await Room.findOne({
-        where: { id: roomId },
+        where: { id: roomId, isDeleted: false },
         attributes: [
           "id",
           "roomName",
@@ -120,18 +121,22 @@ module.exports = {
             model: User,
             as: "Creator",
             attributes: ["id", "username", "serialNumber"],
+            where: { isDeleted: false },
           },
           {
             model: Mission,
             attributes: ["content"],
+            where: { isDeleted: false },
           },
           {
             model: User,
             as: "Members",
             attributes: ["id", "username"],
+            where: { isDeleted: false },
             through: {
               as: "relations",
               attributes: ["SantaUserId", "ManittoUserId"],
+              where: { isDeleted: false },
             },
           },
         ],
@@ -140,10 +145,7 @@ module.exports = {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(
-            util.fail(
-              statusCode.BAD_REQUEST,
-              responseMessage.GET_ONE_ROOM_FAIL,
-            ),
+            util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ONE_ROOM_FAIL)
           );
       }
       res
@@ -152,8 +154,8 @@ module.exports = {
           util.success(
             statusCode.OK,
             responseMessage.GET_ONE_ROOM_SUCCESS,
-            room,
-          ),
+            room
+          )
         );
     } catch (error) {
       console.log(error);
@@ -162,17 +164,17 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
   deleteRoom: async (req, res) => {
     const { roomId } = req.params;
     try {
-      await Room.destroy({
-        where: { id: roomId },
-      });
+      const room = await Room.findOne({ where: { id: roomId } });
+      room.isDeleted = true;
+      await room.save();
       res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.DELETE_ROOM_SUCCESS));
@@ -183,8 +185,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -199,7 +201,7 @@ module.exports = {
 
     try {
       const room = await Room.findOne({
-        where: { invitationCode },
+        where: { invitationCode, isDeleted: false },
         attributes: [
           "id",
           "roomName",
@@ -217,7 +219,7 @@ module.exports = {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(
-            util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED),
+            util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED)
           );
       }
       const RoomId = room.id;
@@ -225,24 +227,25 @@ module.exports = {
         where: {
           RoomId,
           UserId,
+          isDeleted: false,
         },
       });
       if (!created) {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(
-            util.fail(statusCode.BAD_REQUEST, responseMessage.DUPLICATE_MEMBER),
+            util.fail(statusCode.BAD_REQUEST, responseMessage.DUPLICATE_MEMBER)
           );
       } else {
         const user = await User.findOne({
-          where: { id: UserId },
+          where: { id: UserId, isDeleted: false },
           attributes: ["id", "username"],
         });
         return res.status(statusCode.OK).send(
           util.success(statusCode.OK, responseMessage.ROOM_ENTER_SUCCESS, {
             room,
             user,
-          }),
+          })
         );
       }
     } catch (error) {
@@ -252,8 +255,63 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
+        );
+    }
+  },
+  exitRoom: async (req, res) => {
+    const { roomId } = req.body;
+    try {
+      const room = await Room.findOne({
+        where: { id: roomId, isDeleted: false },
+      });
+      if (!room) {
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(
+            util.fail(statusCode.NOT_FOUND, responseMessage.GET_ONE_ROOM_FAIL)
+          );
+      }
+      if (room.isMatchingDone === true)
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(
+            util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED)
+          );
+      if (room.creatorId === req.user.id) {
+        // const userRooms = await User_Room.findAll({ where: { roomId } });
+        await User_Room.update({ isDeleted: true }, { where: { roomId } });
+        room.isDeleted = true;
+        await room.save();
+        return res
+          .status(statusCode.OK)
+          .send(
+            util.success(statusCode.OK, responseMessage.ROOM_EXPLODE_SUCCESS)
+          );
+      }
+      const userRoom = await User_Room.findOne({
+        where: { userId: req.user.id, roomId, isDeleted: false },
+      });
+      console.log("userRoom", userRoom);
+      if (!userRoom)
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
+      userRoom.isDeleted = true;
+      await userRoom.save();
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, responseMessage.ROOM_EXIT_SUCCESS));
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -262,14 +320,23 @@ module.exports = {
     console.log(roomId);
     const { id: currentUserId } = req.user;
     try {
-      const room = await Room.findOne({ where: { id: roomId } });
+      const room = await Room.findOne({
+        where: { id: roomId, isDeleted: false },
+      });
+      if (!room) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(
+            util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ONE_ROOM_FAIL)
+          );
+      }
       if (room.creatorId !== currentUserId) {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NOT_CREATOR));
       }
       const members = await User_Room.findAll({
-        where: { RoomId: roomId },
+        where: { RoomId: roomId, isDeleted: false },
       });
 
       // 마니또 & 산타 매칭
@@ -278,27 +345,30 @@ module.exports = {
       // console.log("dataAfterMatching", dataAfterMatching);
 
       // 미션 매칭
-      let roomMissions = await Mission.findAll({ where: { roomId } });
+      let roomMissions = await Mission.findAll({
+        where: { roomId, isDeleted: false },
+      });
+      shuffleArray(roomMissions);
       // console.log("roomMissions", roomMissions);
+      const randomIndex = Math.floor(Math.random() * roomMissions.length);
       await Promise.all(
-        dataAfterMatching.map(async (d) => {
-          const randomIndex = Math.floor(Math.random() * roomMissions.length);
+        dataAfterMatching.map(async (d, index) => {
           const options = {
             SantaUserId: d.SantaUserId,
             ManittoUserId: d.ManittoUserId,
             PairMissionId:
-              roomMissions.length === 0 ? null : roomMissions[randomIndex].id,
+              roomMissions.length === 0 ? null : roomMissions[index].id,
           };
 
           await User_Room.update(options, {
-            where: { RoomId: roomId, UserId: d.UserId },
+            where: { RoomId: roomId, UserId: d.UserId, isDeleted: false },
           });
           console.log("options", options);
-        }),
+        })
       );
       // console.log("roomId", roomId);
       const updatedMembers = await User_Room.findAll({
-        where: { RoomId: roomId },
+        where: { RoomId: roomId, isDeleted: false },
         attributes: ["UserId", "SantaUserId", "ManittoUserId", "RoomId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
@@ -309,8 +379,8 @@ module.exports = {
           util.success(
             statusCode.OK,
             responseMessage.MATCHING_SUCCESS,
-            updatedMembers,
-          ),
+            updatedMembers
+          )
         );
     } catch (error) {
       console.log(error);
@@ -319,8 +389,8 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
@@ -330,7 +400,7 @@ module.exports = {
     console.log(userId);
     try {
       const myRelations = await User_Room.findOne({
-        where: { RoomId: roomId, UserId: userId },
+        where: { RoomId: roomId, UserId: userId, isDeleted: false },
         // attributes: ["UserId", "SantaUserId", "ManittoUserId", "RoomId"],
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
@@ -340,7 +410,11 @@ module.exports = {
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       }
       const santaMember = await User_Room.findOne({
-        where: { RoomId: roomId, UserId: myRelations.SantaUserId },
+        where: {
+          RoomId: roomId,
+          UserId: myRelations.SantaUserId,
+          isDeleted: false,
+        },
         include: [{ model: Mission, as: "MyMission", attributes: ["content"] }],
       });
       let MissionToMe = null;
@@ -348,13 +422,13 @@ module.exports = {
       if (santaMember) {
         MissionToMe = santaMember.dataValues.MyMission;
         const santaUser = await User.findOne({
-          where: { id: myRelations.SantaUserId },
+          where: { id: myRelations.SantaUserId, isDeleted: false },
         });
         SantaUsername = santaUser.dataValues.username;
       }
       let ManittoUsername = null;
       const manittoUser = await User.findOne({
-        where: { id: myRelations.ManittoUserId },
+        where: { id: myRelations.ManittoUserId, isDeleted: false },
       });
       if (manittoUser) {
         ManittoUsername = manittoUser.dataValues.username;
@@ -365,7 +439,7 @@ module.exports = {
           MissionToMe,
           SantaUsername,
           ManittoUsername,
-        }),
+        })
       );
     } catch (error) {
       console.log(error);
@@ -374,8 +448,47 @@ module.exports = {
         .send(
           util.fail(
             statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.INTERNAL_SERVER_ERROR,
-          ),
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
+        );
+    }
+  },
+  updateOneRoom: async (req, res) => {
+    const { roomId } = req.params;
+    const { roomName, expiration } = req.body;
+
+    try {
+      const room = await Room.findOne({
+        where: { id: roomId, isDeleted: false },
+      });
+      if (!room) {
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(
+            util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_ROOM_FAIL)
+          );
+      }
+      if (+room.creatorId !== +req.user.id)
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.NOT_CREATOR));
+      room.roomName = roomName || room.roomName;
+      room.expiration = expiration || room.expiration;
+      await room.save();
+      res
+        .status(statusCode.OK)
+        .send(
+          util.success(statusCode.OK, responseMessage.UPDATE_ROOM_SUCCESS, room)
+        );
+    } catch (error) {
+      console.log(error);
+      res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(
+          util.fail(
+            statusCode.INTERNAL_SERVER_ERROR,
+            responseMessage.INTERNAL_SERVER_ERROR
+          )
         );
     }
   },
