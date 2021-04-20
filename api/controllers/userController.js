@@ -128,6 +128,8 @@ module.exports = {
               "expiration",
               "createdAt",
             ],
+            where: { isDeleted: false },
+            required: false,
             through: { attributes: [] },
           },
         ],

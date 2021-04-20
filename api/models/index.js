@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const env = process.env.NODE_ENV || "development";
+console.log("env", env);
 const config = require("../../config/config.json")[env];
 const db = {};
 
@@ -11,7 +12,7 @@ if (config.use_env_variable) {
     config.database,
     config.username,
     config.password,
-    config,
+    config
   );
 }
 
