@@ -121,22 +121,18 @@ module.exports = {
             model: User,
             as: "Creator",
             attributes: ["id", "username", "serialNumber"],
-            where: { isDeleted: false },
           },
           {
             model: Mission,
             attributes: ["content"],
-            where: { isDeleted: false },
           },
           {
             model: User,
             as: "Members",
             attributes: ["id", "username"],
-            where: { isDeleted: false },
             through: {
               as: "relations",
               attributes: ["SantaUserId", "ManittoUserId"],
-              where: { isDeleted: false },
             },
           },
         ],
