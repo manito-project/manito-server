@@ -15,41 +15,48 @@ module.exports = {
     const token = req.headers.jwt;
 
     if (!token) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.EMPTY_TOKEN));
+      const CONTEXT = `[NO_TOKEN]`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
+      ${JSON.stringify(error)}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.EMPTY_TOKEN));
     }
 
     const user = await jwt.verify(token);
     if (user === TOKEN_EXPIRED) {
-      return res
-        .status(statusCode.UNAUTHORIZED)
-        .send(
-          util.fail(statusCode.UNAUTHORIZED, responseMessage.EXPIRED_TOKEN)
-        );
+      const CONTEXT = `[TOKEN_EXPIRED] (token: ${token})`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
+      ${JSON.stringify(error)}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.EXPIRED_TOKEN));
     }
     if (user === TOKEN_INVALID) {
-      return res
-        .status(statusCode.UNAUTHORIZED)
-        .send(
-          util.fail(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN)
-        );
+      const CONTEXT = `[TOKEN_INVALID] (token: ${token})`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}
+      ${JSON.stringify(error)}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN));
     }
 
     const userId = user.id;
 
     if (!userId) {
-      return res
-        .status(statusCode.UNAUTHORIZED)
-        .send(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
+      const CONTEXT = `[USER_AUTH_NO_USER_ID]`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
+      ${JSON.stringify(error)}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      return res.status(statusCode.UNAUTHORIZED).send(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
     } else {
       const userInfo = await User.findOne({
         where: { id: userId, isDeleted: false },
       });
-      if (!userInfo)
-        return res
-          .status(statusCode.NOT_FOUND)
-          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+      if (!userInfo) {
+        const CONTEXT = `[USER_AUTH_NO_USER_INFO] (uid: ${userId})`;
+        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
+        ${JSON.stringify(error)}`;
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+      }
       //   console.log(userInfo);
       req.user = userInfo;
       next();
