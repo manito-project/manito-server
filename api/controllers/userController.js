@@ -14,10 +14,8 @@ module.exports = {
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
     try {
-      const [user, created] = await User.findOrCreate({
-        where: { username, serialNumber },
-      });
-      if (!created) {
+      const alreadyUser = await User.findOne({ where: { serialNumber, isDeleted: false } });
+      if (alreadyUser) {
         const CONTEXT = `[SIGN_IN] (username: ${username}, serialNumber: ${serialNumber})`;
         const responseMsg = responseMessage.ALREADY_USER;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
@@ -25,6 +23,8 @@ module.exports = {
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
         return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_USER));
       }
+      const user = await User.create({ username, serialNumber });
+
       const { accessToken } = await jwt.sign(user);
       res.status(statusCode.OK).send(
         util.success(statusCode.OK, responseMessage.CREATE_USER_SUCCESS, {
