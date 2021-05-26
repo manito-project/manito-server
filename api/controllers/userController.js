@@ -107,7 +107,7 @@ module.exports = {
     const { userId } = req.params;
     const { username } = req.body;
     if (!username) {
-      const CONTEXT = `[UPDATE_USER_NULL_VALUE]`;
+      const CONTEXT = `[UPDATE_USER]`;
       const responseMsg = responseMessage.NULL_VALUE;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
       ${JSON.stringify(responseMsg)}`;
@@ -116,7 +116,7 @@ module.exports = {
     }
     try {
       if (+userId !== +req.user.id) {
-        const CONTEXT = `[UPDATE_USER_FORBIDDEN] (req.user.id: ${req.user.id} userId: ${userId})`;
+        const CONTEXT = `[UPDATE_USER] (req.user.id: ${req.user.id} userId: ${userId})`;
         const responseMsg = responseMessage.NOT_AUTHORIZED;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
@@ -127,12 +127,12 @@ module.exports = {
         where: { id: userId, isDeleted: false },
       });
       if (!user) {
-        const CONTEXT = `[UPDATE_USER_NO_USER] (uid: ${userId})`;
-        const responseMsg = responseMessage.UPDATE_USER_FAIL;
+        const CONTEXT = `[UPDATE_USER] (uid: ${userId})`;
+        const responseMsg = responseMessage.NO_USER;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
-        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_USER_FAIL));
+        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
       }
       user.username = username || user.username;
       await user.save();
@@ -165,12 +165,12 @@ module.exports = {
   checkSerial: async (req, res) => {
     const { serialNumber } = req.params;
     if (!serialNumber) {
-      const CONTEXT = `[CHECK_SERIAL_NULL_VALUE]`;
-      const responseMsg = responseMessage.NULL_VALUE;
+      const CONTEXT = `[CHECK_SERIAL]`;
+      const responseMsg = responseMessage.NO_SUCH_SERIAL_NUMBER + "(serialNumber)";
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
       ${JSON.stringify(responseMsg)}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
-      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_SUCH_SERIAL_NUMBER));
     }
     try {
       const user = await User.findOne({
@@ -180,11 +180,12 @@ module.exports = {
       // console.log(user);
       if (!user) {
         const CONTEXT = `[CHECK_SERIAL] (serialNumber: ${serialNumber})`;
+        const responseMsg = responseMessage.NO_USER;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-        ${JSON.stringify(responseMessage.NO_SUCH_SERIAL_NUMBER)}`;
+        ${JSON.stringify(responseMsg)}`;
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
         return res.status(statusCode.OK).send(
-          util.success(statusCode.OK, responseMessage.NO_SUCH_SERIAL_NUMBER, {
+          util.success(statusCode.OK, responseMessage.NO_USER, {
             serialNumber,
           })
         );

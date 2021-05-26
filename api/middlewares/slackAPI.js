@@ -1,6 +1,7 @@
 const axios = require("axios");
+const slackWebHookUrl = require("../../config/slack");
 
-const SLACK_WEB_HOOK_ERROR = "https://hooks.slack.com/services/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";
+const SLACK_WEB_HOOK_ERROR = slackWebHookUrl;
 
 const sendMessageToSlack = (message, apiEndPoint = SLACK_WEB_HOOK_ERROR) => {
   // return;

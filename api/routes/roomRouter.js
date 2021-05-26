@@ -19,21 +19,13 @@ roomRouter.post("/exit", authMiddleware.checkToken, roomController.exitRoom);
 roomRouter.post("/match", authMiddleware.checkToken, roomController.matchPairs);
 
 // Show my relations
-roomRouter.get(
-  "/:roomId/my",
-  authMiddleware.checkToken,
-  roomController.getMyRelations
-);
+roomRouter.get("/:roomId/my", authMiddleware.checkToken, roomController.getMyRelations);
 
 // Read a room by ID
 roomRouter.get("/:roomId", roomController.getOneRoom);
 
 // Update room name or expiration date. Only creator.
-roomRouter.put(
-  "/:roomId",
-  authMiddleware.checkToken,
-  roomController.updateOneRoom
-);
+roomRouter.put("/:roomId", authMiddleware.checkToken, roomController.updateOneRoom);
 
 // Delete a room
 roomRouter.delete("/:roomId", roomController.deleteRoom);
