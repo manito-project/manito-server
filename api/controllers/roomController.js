@@ -264,10 +264,18 @@ module.exports = {
       // console.log("roomMissions", roomMissions);
       await Promise.all(
         dataAfterMatching.map(async (d, index) => {
+	  let pairMissionId;
+	  if (roomMissions.length === 0) pairMissionId = null;
+	  else if (roomMissions.length <= index) {
+	    const calculatedIndex = index - (Math.floor(index / roomMissions.length) * roomMissions.length)
+	    pairMissionId = roomMissions[calculatedIndex].id;
+	  } 
+	  else pairMissionId = roomMissions[index].id;
+
           const options = {
             SantaUserId: d.SantaUserId,
             ManittoUserId: d.ManittoUserId,
-            PairMissionId: roomMissions.length === 0 ? null : roomMissions[index].id,
+	    PairMissionId: pairMissionId,
           };
 
           await User_Room.update(options, {

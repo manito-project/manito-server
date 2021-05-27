@@ -181,7 +181,7 @@ module.exports = {
       if (!user) {
         const CONTEXT = `[CHECK_SERIAL] (serialNumber: ${serialNumber})`;
         const responseMsg = responseMessage.NO_USER;
-        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
+        const slackMessage = `[LOG] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
         ${JSON.stringify(responseMsg)}`;
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
         return res.status(statusCode.OK).send(
