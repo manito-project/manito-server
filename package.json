@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon --exec ./bin/www",
+    "serve": "firebase serve --only functions",
     "deploy-deprecated": "pm2 delete manito-server || : && cross-env NODE_ENV=production pm2 start ./bin/www --name manito-server",
     "deploy": "cross-env NODE_ENV=production firebase deploy --only functions"
   },

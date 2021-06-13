@@ -1,6 +1,15 @@
-const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-admin.initializeApp();
+
+const serviceAccount = require("./santamanitto-2cefe-89a79ec53ac9");
+
+let firebase;
+if (admin.apps.length === 0) {
+  firebase = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+} else {
+  firebase = admin.app();
+}
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
