@@ -24,13 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      // MissionId: {
-      //   type: DataTypes.INTEGER,
-      //   reference: {
-      //     model: Mission,
-      //     key: "id",
-      //   },
-      // },
+      isDeletedFromHistory: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     { freezeTableName: true, timestamps: true }
   );

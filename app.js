@@ -9,7 +9,7 @@ const { sequelize } = require("./api/models");
 var indexRouter = require("./api/routes/index");
 
 sequelize
-  // .sync({ alter: true, force: true })
+  // .sync({ alter: true, force: false })
   .sync({ alter: false })
   .then(() => {
     console.log("✅ Connected to the database!");

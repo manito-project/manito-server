@@ -1,3 +1,4 @@
+const { serializeError } = require("serialize-error");
 const { User, Room, User_Room, Mission } = require("../models");
 const jwt = require("../modules/jwt");
 const responseMessage = require("../modules/responseMessage");
@@ -20,7 +21,7 @@ module.exports = {
         const responseMsg = responseMessage.ALREADY_USER;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_USER));
       }
       const user = await User.create({ username, serialNumber });
@@ -37,8 +38,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[SIGN_IN] (username: ${username}, serialNumber: ${serialNumber})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
 
@@ -53,7 +54,7 @@ module.exports = {
         const responseMsg = responseMessage.GET_ALL_USERS_FAIL;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ALL_USERS_FAIL));
       }
       res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.GET_ALL_USERS_SUCCESS, users));
@@ -62,8 +63,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[GET_ALL_USERS]`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
 
@@ -79,10 +80,10 @@ module.exports = {
           {
             model: Room,
             as: "JoinedRooms",
-            attributes: ["id", "roomName", "isMatchingDone", "expiration", "createdAt"],
+            attributes: ["id", "creatorId", "roomName", "isMatchingDone", "expiration", "createdAt"],
             where: { isDeleted: false },
             required: false,
-            through: { attributes: [] },
+            through: { where: { isDeletedFromHistory: false }, attributes: [] },
           },
         ],
       });
@@ -90,17 +91,18 @@ module.exports = {
         const CONTEXT = `[GET_ONE_USER] (uid: ${userId})`;
         const responseMsg = responseMessage.GET_ONE_USER_FAIL;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}\n${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ONE_USER_FAIL));
       }
       res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.GET_ONE_USER_SUCCESS, user));
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      console.log(JSON.stringify(serializeError(error)));
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[GET_ONE_USER] (uid: ${userId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   updateUser: async (req, res) => {
@@ -111,7 +113,7 @@ module.exports = {
       const responseMsg = responseMessage.NULL_VALUE;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
       ${JSON.stringify(responseMsg)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
     try {
@@ -120,7 +122,7 @@ module.exports = {
         const responseMsg = responseMessage.NOT_AUTHORIZED;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.FORBIDDEN).send(util.fail(statusCode.FORBIDDEN, responseMessage.NOT_AUTHORIZED));
       }
       const user = await User.findOne({
@@ -131,7 +133,7 @@ module.exports = {
         const responseMsg = responseMessage.NO_USER;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
       }
       user.username = username || user.username;
@@ -142,8 +144,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[UPDATE_USER] (uid: ${userId}, username: ${username})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   deleteUser: async (req, res) => {
@@ -158,8 +160,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[DELETE_USER] (uid: ${userId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   checkSerial: async (req, res) => {
@@ -169,7 +171,7 @@ module.exports = {
       const responseMsg = responseMessage.NO_SUCH_SERIAL_NUMBER + "(serialNumber)";
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
       ${JSON.stringify(responseMsg)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_SUCH_SERIAL_NUMBER));
     }
     try {
@@ -180,10 +182,10 @@ module.exports = {
       // console.log(user);
       if (!user) {
         const CONTEXT = `[CHECK_SERIAL] (serialNumber: ${serialNumber})`;
-        const responseMsg = responseMessage.NO_USER;
+        const responseMsg = responseMessage.NO_USER + "신규 가입 ㄷ ㄷ";
         const slackMessage = `[LOG] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_NEW_USERS);
         return res.status(statusCode.OK).send(
           util.success(statusCode.OK, responseMessage.NO_USER, {
             serialNumber,
@@ -202,8 +204,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[CHECK_SERIAL] (serialNumber: ${serialNumber})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
 };

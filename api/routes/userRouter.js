@@ -19,6 +19,6 @@ userRouter.get("/:userId", userController.getOneUser);
 userRouter.put("/:userId", authMiddleware.checkToken, userController.updateUser);
 
 // Delete a user
-userRouter.delete("/:userId", userController.deleteUser);
+userRouter.delete("/:userId", authMiddleware.checkToken, userController.deleteUser);
 
 module.exports = userRouter;

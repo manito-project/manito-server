@@ -45,6 +45,7 @@ module.exports = {
   UPDATE_ROOM_FAIL: "방 수정 실패. 존재하지 않는 방입니다.",
   DELETE_ROOM_SUCCESS: "방 삭제 성공",
   DELETE_ROOM_FAIL: "방 삭제 실패",
+  DELETE_FROM_HISTORY_SUCCESS: "히스토리에서 방 삭제 성공",
 
   // 방 입장
   ROOM_ENTER_SUCCESS: "방 입장 성공",
@@ -61,13 +62,6 @@ module.exports = {
 
   // 내 관계
   GET_MY_RELATIONS_SUCCESS: "내 관계 정보 조회 성공",
-
-  /* 토큰 */
-  EMPTY_TOKEN: "토큰 값이 없습니다.",
-  EXPIRED_TOKEN: "토큰 값이 만료되었습니다.",
-  INVALID_TOKEN: "유효하지 않은 토큰값입니다.",
-  AUTH_SUCCESS: "인증에 성공했습니다.",
-  ISSUE_SUCCESS: "새로운 토큰이 생성되었습니다.",
 
   /* 서버에러 */
   INTERNAL_SERVER_ERROR: "서버 내부 오류",

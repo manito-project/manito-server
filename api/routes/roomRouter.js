@@ -21,6 +21,9 @@ roomRouter.post("/match", authMiddleware.checkToken, roomController.matchPairs);
 // Show my relations
 roomRouter.get("/:roomId/my", authMiddleware.checkToken, roomController.getMyRelations);
 
+// Delete User_Room from history
+roomRouter.delete("/:roomId/history", authMiddleware.checkToken, roomController.deleteUserRoomFromHistory);
+
 // Read a room by ID
 roomRouter.get("/:roomId", roomController.getOneRoom);
 
@@ -28,6 +31,6 @@ roomRouter.get("/:roomId", roomController.getOneRoom);
 roomRouter.put("/:roomId", authMiddleware.checkToken, roomController.updateOneRoom);
 
 // Delete a room
-roomRouter.delete("/:roomId", roomController.deleteRoom);
+roomRouter.delete("/:roomId", authMiddleware.checkToken, roomController.deleteRoom);
 
 module.exports = roomRouter;

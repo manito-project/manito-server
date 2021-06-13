@@ -1,3 +1,5 @@
+const moment = require("moment");
+const { serializeError } = require("serialize-error");
 const Op = require("sequelize/lib/operators");
 const { Room, User, User_Room, Mission } = require("../models");
 const responseMessage = require("../modules/responseMessage");
@@ -18,7 +20,7 @@ module.exports = {
       const responseMsg = responseMessage.NULL_VALUE;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
       ${JSON.stringify(responseMsg)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
     const invitationCode = generateCode();
@@ -46,8 +48,8 @@ module.exports = {
       console.log(error);
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[CREATE_ROOM] (roomName: ${roomName}, expiration: ${expiration}, missionContents: ${missionContents})`;
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} \n ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} \n ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   getAllRooms: async (req, res) => {
@@ -61,7 +63,7 @@ module.exports = {
         const responseMsg = responseMessage.GET_ALL_ROOMS_FAIL;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ALL_ROOMS_FAIL));
       }
 
@@ -71,12 +73,11 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = "[GET_ALL_ROOMS]";
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
 
-  // TODO: user verification
   getOneRoom: async (req, res) => {
     const { roomId } = req.params;
 
@@ -122,8 +123,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[GET_ONE_ROOM] (rId: ${roomId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   deleteRoom: async (req, res) => {
@@ -138,8 +139,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[DELETE_ROOM] (rId: ${roomId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   enterRoom: async (req, res) => {
@@ -187,8 +188,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[ENTER_ROOM] (invitationCode: ${invitationCode})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   exitRoom: async (req, res) => {
@@ -200,7 +201,7 @@ module.exports = {
       if (!room) {
         return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.GET_ONE_ROOM_FAIL));
       }
-      if (room.isMatchingDone === true) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED));
+      if (room.isMatchingDone === true && moment(room.expiration).isAfter(moment())) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED));
       if (room.creatorId === req.user.id) {
         // const userRooms = await User_Room.findAll({ where: { roomId } });
         await User_Room.update({ isDeleted: true }, { where: { roomId } });
@@ -220,8 +221,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[EXIT_ROOM] (rId: ${roomId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   matchPairs: async (req, res) => {
@@ -236,7 +237,7 @@ module.exports = {
         const responseMsg = responseMessage.GET_ONE_ROOM_FAIL;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.GET_ONE_ROOM_FAIL));
       }
       if (room.creatorId !== currentUserId) {
@@ -244,7 +245,7 @@ module.exports = {
         const responseMsg = responseMessage.NOT_CREATOR;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NOT_CREATOR));
       }
       const members = await User_Room.findAll({
@@ -264,18 +265,17 @@ module.exports = {
       // console.log("roomMissions", roomMissions);
       await Promise.all(
         dataAfterMatching.map(async (d, index) => {
-	  let pairMissionId;
-	  if (roomMissions.length === 0) pairMissionId = null;
-	  else if (roomMissions.length <= index) {
-	    const calculatedIndex = index - (Math.floor(index / roomMissions.length) * roomMissions.length)
-	    pairMissionId = roomMissions[calculatedIndex].id;
-	  } 
-	  else pairMissionId = roomMissions[index].id;
+          let pairMissionId;
+          if (roomMissions.length === 0) pairMissionId = null;
+          else if (roomMissions.length <= index) {
+            const calculatedIndex = index - Math.floor(index / roomMissions.length) * roomMissions.length;
+            pairMissionId = roomMissions[calculatedIndex].id;
+          } else pairMissionId = roomMissions[index].id;
 
           const options = {
             SantaUserId: d.SantaUserId,
             ManittoUserId: d.ManittoUserId,
-	    PairMissionId: pairMissionId,
+            PairMissionId: pairMissionId,
           };
 
           await User_Room.update(options, {
@@ -296,8 +296,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[MATCH_PAIRS] (rId: ${roomId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   getMyRelations: async (req, res) => {
@@ -314,7 +314,7 @@ module.exports = {
         const responseMsg = responseMessage.NOT_IN_ROOM;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
         return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       }
       const santaMember = await User_Room.findOne({
@@ -354,8 +354,8 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[GET_MY_RELATIONS] (rId: ${roomId})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
   updateOneRoom: async (req, res) => {
@@ -368,13 +368,20 @@ module.exports = {
       });
       if (!room) {
         const CONTEXT = `[UPDATE_ONE_ROOM]`;
+        const responseMsg = responseMessage.GET_ONE_ROOM_FAIL;
+        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
+        ${JSON.stringify(responseMsg)}`;
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
+        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_ROOM_FAIL));
+      }
+      if (+room.creatorId !== +req.user.id) {
+        const CONTEXT = `[UPDATE_ONE_ROOM]`;
         const responseMsg = responseMessage.NOT_CREATOR;
         const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
         ${JSON.stringify(responseMsg)}`;
-        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
-        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_ROOM_FAIL));
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
+        return res.status(statusCode.FORBIDDEN).send(util.fail(statusCode.FORBIDDEN, responseMessage.NOT_CREATOR));
       }
-      if (+room.creatorId !== +req.user.id) return res.status(statusCode.FORBIDDEN).send(util.fail(statusCode.FORBIDDEN, responseMessage.NOT_CREATOR));
       room.roomName = roomName || room.roomName;
       room.expiration = expiration || room.expiration;
       await room.save();
@@ -384,8 +391,46 @@ module.exports = {
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
       const CONTEXT = `[UPDATE_ONE_ROOM] (rId: ${roomId}, roomName: ${roomName}, expiration: ${expiration})`;
       const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
-      ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
+    }
+  },
+  deleteUserRoomFromHistory: async (req, res) => {
+    const { roomId } = req.params;
+
+    try {
+      const room = await Room.findOne({
+        where: { id: roomId, isDeleted: false },
+      });
+      if (!room) {
+        const CONTEXT = `[DELETE_ROOM_FROM_HISTORY]`;
+        const responseMsg = responseMessage.GET_ONE_ROOM_FAIL;
+        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
+        ${JSON.stringify(responseMsg)}`;
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
+        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.UPDATE_ROOM_FAIL));
+      }
+      const userRoom = await User_Room.findOne({
+        where: { userId: req.user.id, roomId, isDeleted: false },
+      });
+      if (!userRoom) {
+        const CONTEXT = `[DELETE_ROOM_FROM_HISTORY]`;
+        const responseMsg = responseMessage.NOT_IN_ROOM;
+        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
+        ${JSON.stringify(responseMsg)}`;
+        slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
+        return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
+      }
+      userRoom.isDeletedFromHistory = true;
+      await userRoom.save();
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_FROM_HISTORY_SUCCESS, room));
+    } catch (error) {
+      console.log(error);
+      res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+      const CONTEXT = `[DELETE_ROOM_FROM_HISTORY] (rId: ${roomId})`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} uname:${req.user.username} uid:${req.user.id} 
+      ${JSON.stringify(serializeError(error))}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_IMPORTANT_ERRORS);
     }
   },
 };
