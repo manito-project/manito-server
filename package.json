@@ -4,25 +4,12 @@
   "private": true,
   "scripts": {
     "start": "nodemon --exec ./bin/www",
-    "deploy": "pm2 delete manito-server || : && cross-env NODE_ENV=production pm2 start ./bin/www --name manito-server"
+    "deploy-deprecated": "pm2 delete manito-server || : && cross-env NODE_ENV=production pm2 start ./bin/www --name manito-server",
+    "deploy": "cross-env NODE_ENV=production firebase deploy --only functions"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "cookie-parser": "~1.4.4",
-    "cors": "^2.8.5",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
-    "jsonwebtoken": "^8.5.1",
-    "moment": "^2.29.1",
-    "morgan": "~1.9.1",
-    "mysql2": "^2.2.5",
-    "nanoid": "^3.1.19",
-    "nodemon": "^2.0.6",
-    "sequelize": "^6.3.5",
-    "sequelize-cli": "^6.2.0",
-    "serialize-error": "^8.1.0"
+    "cross-env": "^7.0.3",
+    "eslint": "^7.28.0"
   },
   "devDependencies": {
     "eslint-config-prettier": "^8.3.0"

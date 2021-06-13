@@ -1,3 +1,4 @@
+const functions = require("firebase-functions");
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
@@ -49,4 +50,17 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-module.exports = app;
+module.exports = functions
+  .runWith({
+    timeoutSeconds: 300,
+    memory: "256MB",
+  })
+  .region("asia-northeast2")
+  .https.onRequest(async (req, res) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("\n\n", "[api]", req.method, req.originalUrl, req.headers.currentbuildno, req.headers.timezone, req.body);
+    } else {
+      console.log("[api]", req.method, req.originalUrl, req.headers.currentbuildno, req.headers.timezone, req.body);
+    }
+    return app(req, res);
+  });
