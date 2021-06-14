@@ -182,7 +182,8 @@ module.exports = {
       // console.log(user);
       if (!user) {
         const CONTEXT = `[CHECK_SERIAL] (serialNumber: ${serialNumber})`;
-        const responseMsg = responseMessage.NO_USER + "신규 가입 ㄷ ㄷ";
+        const numberOfUsers = await User.count({ where: { isDeleted: false }, distinct: true, col: "User.id" });
+        const responseMsg = responseMessage.NO_USER + `현재 유저 수: ${numberOfUsers}`;
         const slackMessage = `[LOG] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
         ${JSON.stringify(responseMsg)}`;
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_NEW_USERS);
