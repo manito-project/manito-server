@@ -80,10 +80,10 @@ module.exports = {
           {
             model: Room,
             as: "JoinedRooms",
-            attributes: ["id", "creatorId", "roomName", "isMatchingDone", "expiration", "createdAt"],
+            attributes: ["id", "creatorId", "roomName", "isMatchingDone", "expiration", "createdAt", "isDeleted", "isDeletedByCreator"],
             where: { isDeleted: false },
             required: false,
-            through: { where: { isDeletedFromHistory: false }, attributes: [] },
+            through: { where: { isDeletedFromHistory: false }, attributes: ["isDeletedFromHistory"] },
           },
         ],
       });
