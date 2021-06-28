@@ -203,6 +203,7 @@ module.exports = {
       if (room.creatorId === req.user.id) {
         // const userRooms = await User_Room.findAll({ where: { roomId } });
         await User_Room.update({ isDeleted: true }, { where: { roomId } });
+        await User_Room.update({ isDeletedFromHistory: true }, { where: { roomId, userId: req.user.id } });
         room.isDeletedByCreator = true;
         await room.save();
         return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXPLODE_SUCCESS));
