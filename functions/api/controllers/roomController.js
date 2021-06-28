@@ -10,8 +10,6 @@ const generateCode = require("../services/generateCode");
 const shuffleArray = require("../services/shuffleArray");
 const slackAPI = require("../middlewares/slackAPI");
 
-// TODO: user authentication
-// TODO: Data validation
 module.exports = {
   createRoom: async (req, res) => {
     const { roomName, expiration, missionContents } = req.body;
@@ -84,7 +82,7 @@ module.exports = {
     try {
       const room = await Room.findOne({
         where: { id: roomId, isDeleted: false },
-        attributes: ["id", "roomName", "invitationCode", "isMatchingDone", "expiration", "createdAt"],
+        attributes: ["id", "roomName", "invitationCode", "isMatchingDone", "expiration", "createdAt", "isDeleted", "isDeletedByCreator"],
         include: [
           {
             model: User,

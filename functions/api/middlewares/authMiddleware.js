@@ -3,6 +3,7 @@ const jwt = require("../modules/jwt");
 const statusCode = require("../modules/statusCode");
 const responseMessage = require("../modules/responseMessage");
 const { User } = require("../models");
+const slackAPI = require("./slackAPI");
 const TOKEN_EXPIRED = -3;
 const TOKEN_INVALID = -2;
 
@@ -16,8 +17,7 @@ module.exports = {
 
     if (!token) {
       const CONTEXT = `[NO_TOKEN]`;
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-      ${JSON.stringify(serializeError(error))}`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.EMPTY_TOKEN));
     }
@@ -25,15 +25,13 @@ module.exports = {
     const user = await jwt.verify(token);
     if (user === TOKEN_EXPIRED) {
       const CONTEXT = `[TOKEN_EXPIRED] (token: ${token})`;
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-      ${JSON.stringify(serializeError(error))}`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
       return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.EXPIRED_TOKEN));
     }
     if (user === TOKEN_INVALID) {
       const CONTEXT = `[TOKEN_INVALID] (token: ${token})`;
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}
-      ${JSON.stringify(serializeError(error))}`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
       return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN));
     }
@@ -42,8 +40,7 @@ module.exports = {
 
     if (!userId) {
       const CONTEXT = `[USER_AUTH_NO_USER_ID]`;
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}  
-      ${JSON.stringify(serializeError(error))}`;
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
       return res.status(statusCode.UNAUTHORIZED).send(statusCode.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
     } else {
@@ -52,8 +49,7 @@ module.exports = {
       });
       if (!userInfo) {
         const CONTEXT = `[USER_AUTH_NO_USER_INFO] (uid: ${userId})`;
-        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl} 
-        ${JSON.stringify(serializeError(error))}`;
+        const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${CONTEXT || ""} ${req.originalUrl}`;
         slackAPI.sendMessageToSlack(slackMessage, slackAPI.SLACK_WEB_HOOK_ERROR);
         return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
       }
