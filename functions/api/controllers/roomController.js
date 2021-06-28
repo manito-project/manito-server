@@ -202,7 +202,6 @@ module.exports = {
       if (room.isMatchingDone === true && moment(room.expiration).isAfter(moment())) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_MATCHED));
       if (room.creatorId === req.user.id) {
         // const userRooms = await User_Room.findAll({ where: { roomId } });
-        await User_Room.update({ isDeleted: true }, { where: { roomId } });
         await User_Room.update({ isDeletedFromHistory: true }, { where: { roomId, userId: req.user.id } });
         room.isDeletedByCreator = true;
         await room.save();
