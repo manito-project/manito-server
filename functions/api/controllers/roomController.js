@@ -131,7 +131,7 @@ module.exports = {
       const room = await Room.findOne({ where: { id: roomId } });
       room.isDeleted = true;
       await room.save();
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_ROOM_SUCCESS));
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_ROOM_SUCCESS, {}));
     } catch (error) {
       console.log(error);
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
@@ -206,7 +206,7 @@ module.exports = {
         await User_Room.update({ isDeletedFromHistory: true }, { where: { roomId, userId: req.user.id } });
         room.isDeletedByCreator = true;
         await room.save();
-        return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXPLODE_SUCCESS));
+        return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXPLODE_SUCCESS, {}));
       }
       const userRoom = await User_Room.findOne({
         where: { userId: req.user.id, roomId, isDeleted: false },
@@ -214,7 +214,7 @@ module.exports = {
       if (!userRoom) return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       userRoom.isDeleted = true;
       await userRoom.save();
-      return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXIT_SUCCESS));
+      return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXIT_SUCCESS, {}));
     } catch (error) {
       console.log(error);
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));

@@ -154,7 +154,7 @@ module.exports = {
       const user = await User.findOne({ where: { id: userId } });
       user.isDeleted = true;
       await user.save();
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_USER_SUCCESS));
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_USER_SUCCESS, {}));
     } catch (error) {
       console.log(error);
       res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
