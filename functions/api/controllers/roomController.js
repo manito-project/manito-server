@@ -212,6 +212,7 @@ module.exports = {
       });
       if (!userRoom) return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, responseMessage.NOT_IN_ROOM));
       userRoom.isDeleted = true;
+      userRoom.isDeletedFromHistory = true;
       await userRoom.save();
       return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ROOM_EXIT_SUCCESS, {}));
     } catch (error) {
