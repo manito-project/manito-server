@@ -164,7 +164,6 @@ module.exports = {
         where: {
           RoomId,
           UserId,
-          isDeleted: false,
         },
       });
       if (!created) {

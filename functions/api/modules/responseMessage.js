@@ -52,7 +52,7 @@ module.exports = {
   ROOM_EXIT_SUCCESS: "방 나가기 성공",
   ROOM_EXPLODE_SUCCESS: "방 폭파 성공",
   NOT_IN_ROOM: "해당 방에 입장하지 않았습니다",
-  DUPLICATE_MEMBER: "이미 있는 멤버입니다",
+  DUPLICATE_MEMBER: "이미 입장했던 방입니다",
   INVALID_CODE: "초대코드가 잘못되었습니다",
   ALREADY_MATCHED: "이미 매칭이 완료된 방입니다",
 
