@@ -53,7 +53,7 @@ app.use(function (err, req, res, next) {
 module.exports = functions
   .runWith({
     timeoutSeconds: 300,
-    memory: "256MB",
+    memory: "512MB",
   })
   .region("asia-northeast2")
   .https.onRequest(async (req, res) => {
